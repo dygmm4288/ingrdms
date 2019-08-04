@@ -1,0 +1,373 @@
+
+ * {
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
+
+body {
+    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+    background-color: #d2d2d2;
+    /*background-image:linear-gradient(top, #c7e9ff 0%, #a7d7f7 51%);
+    background-image:-webkit-linear-gradient(top, #c7e9ff 0%, #a7d7f7 51%);
+    background-image:-ms-linear-gradient(top, #c7e9ff 0%, #a7d7f7 51%);
+    background-image:-webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0, #a7d7f7),
+        color-stop(0.51, #a7d7f7)
+    );
+    background-attachment:fixed;*/
+
+    font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
+    font-size:12px;
+    height:100%;    
+    margin:0px;
+    padding:0px;
+    text-transform:uppercase;
+    width:100%;
+}
+/*이진호 부분*/
+/* Portrait layout (default)  411*823 */
+.app {
+  /*  background:url(../img/refrigerator.jpg) no-repeat center top; /* 170px x 200px */
+  /*  position:absolute;             /* position in the center of the screen */
+  /*  left:50%;
+    top:50%;
+    height:50px;                   /* text area height */
+  /*  width:200px;                   /* text area width */
+   /* text-align:center;
+    padding:150px 20px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
+    /*margin:-115px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
+                                   /* offset horizontal: half of text area width */
+    max-width: 350px;
+    height: 600px;
+    margin: 0 auto; 
+    position: relative;
+    top: 50px;
+    text-align:center;
+    background:url(../img/refrigerator.png) no-repeat center;
+    background-size: 350px 350px;
+    background-position: 10px 20px;
+}
+.main{
+  
+    text-align:center;
+}
+input[type=text], input[type=password]{
+    block-size:45px;
+    display: inline-block;
+    width: 75%;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing:border-box;
+    padding: 10px;
+}
+input[type=text]:focus,input[type=password]:focus{
+    background-color: lightblue;
+}
+.skipButton{
+    animation:fade 4000ms infinite;
+    -webkit-animation:fade 4000ms infinite;
+    block-size:30px;
+    width: 45%;
+    position:relative;
+    top:10px;
+    border: 1px solid #ccc;
+    font-size:16px;
+    border-radius:8px; 
+    background-color: gray;
+}
+input[type=submit]{
+    animation:fade 4000ms infinite;
+    -webkit-animation:fade 4000ms infinite;
+    block-size:30px;
+    width: 45%;
+    position:relative;
+    top:10px;
+    border: 1px solid #ccc;
+    font-size:16px;
+    border-radius:8px;
+    background-color: gray;
+}
+.loginForm{
+    position:relative;
+    top: 50%;    
+}
+.subLogin{
+    text-align:center;
+    position:relative;
+    top: 30px;
+}
+.topLogin{
+    text-align: right;
+    justify-items: center;
+    position: relative;
+    max-width:350px;
+    height: 50px;
+}
+.content{
+    display: flex;
+    max-width:100%;
+    height: 80%;
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+.footer{
+    display: flex;
+    max-width:100%;
+    height: 10%;
+    position: relative;
+}
+.stateButton{
+    background-color: #f8b600;
+    border-radius: 8px;
+    font: bold;
+    border-color: #f8b600;
+}
+.header{
+    max-width: 100%;
+    height: 10%;
+    text-align: center;
+}
+.column{
+    max-width: 100%;
+    height: 25%;
+    background-color:gray;
+    display:-webkit-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.columnItem{
+    display: flex;
+    min-width: 40%;
+    max-width: 40%;
+    min-height: 45%;
+    max-height: 45%;
+    justify-items: center;
+    border-radius: 10px;
+    margin: 0 auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+.left{
+    background-color:#f8b600;
+}
+.right{
+    background-color: white;
+    border: solid;
+    display: flex;
+    flex-direction: row;
+}
+.right_btn{
+    background-color: white;
+    border: solid;
+    display : flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+#cancle_btn{
+    -webkit-animation:fade 4000ms infinite;
+    block-size:30px;
+    width: 45%;
+    position:relative;
+    top:10px;
+    border: 1px solid #ccc;
+    font-size:16px;
+    border-radius:8px;
+    background-color: #fcff4e;
+}
+/*Landscape layout (with min-width) */
+
+
+h1 {
+    font-size:24px;
+    font-weight:normal;
+    margin:0px;
+    overflow:visible;
+    padding:0px;
+    text-align:center;
+}
+
+.event {
+    border-radius:4px;
+    -webkit-border-radius:4px;
+    color:#FFFFFF;
+    font-size:12px;
+    margin:0px 30px;
+    padding:2px 0px;
+}
+
+.event.listening {
+    background-color:#333333;
+    display:block;
+}
+
+.event.received {
+    background-color:#4B946A;
+    display:none;
+}
+
+@keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.4; }
+    to { opacity: 1.0; }
+}
+ 
+@-webkit-keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.4; }
+    to { opacity: 1.0; }
+}
+ 
+.blink {
+    animation:fade 4000ms infinite;
+    -webkit-animation:fade 4000ms infinite;
+    position:relative;
+}
+.submit{
+    animation:fade 4000ms infinite;
+    -webkit-animation:Fade 4000ms infinite;
+    background-color: #fcff4e
+}
+a:link,a,a:visited{
+    text-decoration:none;
+    color:black;
+}
+/* 이가온 부분 */
+.box {
+    max-width: 100%;  height:20%; 
+    background-color: rgba(255, 255, 255, 0.767); 
+    position:relative; 
+    z-index: 1;
+    border-style:outset;
+    border-width:20px;
+    border-top-width:0px;
+    /* border-bottom-color:rgba(255, 255, 255,0.938); */
+    border-bottom-color:#8EAFE5;
+    border-left-color:#4472C4;
+    border-right-color:#4472C4;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content:flex-start;
+}
+.line{
+    max-width: 100%;  height: 0.8%; 
+    background-color: rgba(255, 255, 255, 0.767); 
+    position:relative; 
+     z-index: 1;
+ }
+.fixed {   
+    height: 10%;
+    position: relative;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background-color:white;
+}
+.font{
+    font-size: 30;
+   
+}
+.all{
+    max-width: 350px;
+    height: 600px;
+    margin: 0 auto; 
+    position: relative;
+    top: 50px;
+}
+.circle{
+    
+    width:50px; height:50px; border-radius:50px;
+    background-color: #f8b600;
+    position: relative;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    margin: 2;
+
+  
+}
+.plus{
+left:310px;
+
+font-size: 50px;
+position: absolute;
+bottom: 15px;
+
+}
+.button{
+    width: 100%;  height: 14.5%; 
+    font-size:23px;
+    color:black;
+    text-align:center;
+    background-color: rgb(255, 255, 255); 
+    position:relative; 
+    border-radius:10px;
+}
+.cycle{
+    width:18%; height:10%;
+    background-color: rgb(255, 255, 255); 
+    position:relative; 
+    border-radius:40px ;
+    display: inline-block;
+    margin-bottom: 1%;
+    font-size:15px;
+    margin-left: 1%;
+}
+.classify{
+    position:relative; 
+    max-width: 40%;  height: 33%; 
+    background-color: rgb(66, 211, 255); 
+    font-size:20px;
+    text-align: center;
+    border-radius:10px ;
+
+}
+ .solidbox{
+    position:relative; 
+    width: 40%;  height: 33%; 
+    margin-left: 5%;
+    border:solid;
+    font-size:20px;
+    text-align: center;
+    display:-webkit-flex;
+    display:flex;
+    -webkit-align-items: center;
+          align-items: center;
+  -webkit-justify-content: center;
+          justify-content: center;
+          border-radius:10px ;
+
+
+ }
+ .inputbox{
+    position:relative; 
+    width: 30%;  height: 7%; 
+    margin-left: 7%;
+ 
+    background-color: rgb(241, 226, 87); 
+    font-size:20px;
+    text-align: center;
+    display:-webkit-flex;
+    display:flex;
+    -webkit-align-items: center;
+          align-items: center;
+  -webkit-justify-content: center;
+          justify-content: center;
+          border-radius:10px ;
+}
+    
+.list{
+    background-color: white;
+    flex: 1;
+    border: none;
+    position: relative;
+    border-radius: 6px;
+}
