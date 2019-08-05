@@ -479,6 +479,8 @@ const cheerio = require('cheerio'),
       loginModule = require('./public/js/login'),
       login = new loginModule(),
       userData = require('./public/js/userData')(),
+      DataBase = require('./public/js/DataBase'),
+      database = new DataBase(),
       arr_userData = [],
       first_recommend = [],
       setTable = function(Table,count) {
@@ -547,7 +549,8 @@ const cheerio = require('cheerio'),
         };
     }());
 let recipeTable = new Array(),
-    $ = null;
+    $ = null,
+    query = null;
 
     recipeTable = setTable(recipeTable,10);
 
@@ -737,6 +740,54 @@ var result = null;
 //User Data
 var userid = 'dygmm4288';
 
+query = 'select * from ingredient_u where ingUser_id = ?';
+database.query(query,userid).then((row) => {
+    if(row.length === 0) {
+        console.log("selct * from ingredient_u where ingUser_id 결과없음");
+    }
+    else {
+
+        row.forEach((value) => {
+            arr_userData.push(new userData.UserIngrd(userid,value.ing_name,'좋음','500g'));
+        });
+        return new Promise((response,reject) => {
+            response(arr_userData);
+        }).then((arr_userData => {
+            arr_userData.forEach((user_value) => {
+                ingrd_list.forEach((ingrd_value) => {
+                    if(ingrd_value.ingredient_name === user_value.ingrd_name && ingrd_value.ing_typeCode === '3060001')
+            {
+                var cur = recipeTable[ingrd_value.ingRecipe_id % 10]._head;
+                Recommend.first(cur,ingrd_value,user_value,true);
+                
+            }
+            else if (ingrd_value.ingrdient_name === user_value.ingrd_name){
+                var cur = recipeTable[ingrd_value.ingRecipe_id % 10]._head;
+                Recommend.first(cur,ingrd_value,user_value,false);
+            }
+                });
+            });
+            for(i in first_recommend) {
+                var tmp = 0,
+                    prime = 0,
+                    sub = 0,
+                    that = first_recommend[i];
+                prime = 14*(that.prime_ingrd/that.count_ingrd);
+                sub = 6*(that.sub_ingrd/that.count_ingrd);
+                tmp = prime + sub;
+                that.weight += (tmp/20)*0.2;
+            }
+            return new Promise((response,reject)=>{
+                response(first_recommend);
+            }).then((first_recommend) => {
+                res.send(first_recommend);
+            });
+        }))
+    };
+}).catch((err) => {
+    throw err;
+});
+/*
 login.getIngrd(userid).then((rows)=>{
     rows.forEach((v)=>{
         arr_userData.push(new userData.UserIngrd(userid,v.ingrd_name,'좋음','500g'));
@@ -774,6 +825,8 @@ login.getIngrd(userid).then((rows)=>{
     })
 }).then((arr_recipe)=>{res.send(arr_recipe);})
 .catch((err)=>{console.log(err)});
+*/
+
 
 });
 app.get('/setRecipe',(req,res)=>{

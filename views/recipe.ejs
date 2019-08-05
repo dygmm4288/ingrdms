@@ -12,27 +12,6 @@
 <div class = "header" style = "background-color:#f8b600"></div>
 <div class = "content" style = "background-color:white; justify-content:flex-start">
     <ul class = "channel_list" style = "margin:0;padding:0">
-      <li class = "recipe_item">
-        <div class = "thumb">
-          <img src = "http://file.okdab.com/UserFiles/searching/recipe/000200.jpg"
-          style = "max-width: 100%;height:auto"/>
-        </div>
-        <strong class = "title">
-          이것은 레시피 입니다.<br>
-          60분이 걸리고 어렵습니다.
-        </strong>
-      </li>
-      <li class = "recipe_item">
-          <div class = "thumb">
-            <img src = "http://file.okdab.com/UserFiles/searching/recipe/000200.jpg"
-            style = "max-width: 100%;height:auto"/>
-          </div>
-          <strong class = "title">
-            이것은 레시피 입니다.<br>
-            60분이 걸리고 어렵습니다.
-          </strong>
-        </li>
-        
     </ul>
     
 </div>
@@ -56,13 +35,19 @@ success: function(data){
     let amount = data[i].amount;
     let level =data[i].level;
     let img = data[i].img_url;
-    $('.content').append(`
-    <article style = 'font-size: 20px' id = "${recipe_id}">
-    <img src = "${img}" style = "weight:50px;height:50px"/>
-    ${recipe_id}${recipe_name}${type}${classi}${time}${amount}${level}
-    </article>`)
+    $('.channel_list').append(`
+    <li class = "recipe_item">
+        <div class = "thumb">
+          <img src = "${img}"
+          style = "max-width: 100%;height:auto"/>
+        </div>
+        <strong class = "title">
+          ${recipe_name}.<br>
+          ${time} ${level}
+        </strong>
+      </li>`)
     }
-    $('article').bind('click',function(e){
+    $('li').bind('click',function(e){
     new Promise((res,rej)=>{
       let result = confirm('이 레시피를 선택하시겠습니까?');
       if(result) {
