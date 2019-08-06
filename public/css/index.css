@@ -111,7 +111,6 @@ input[type=submit]{
     display: flex;
     max-width:100%;
     height: 80%;
-    position: relative;
     flex-direction: column;
     justify-content: flex-end;
 }
@@ -133,13 +132,13 @@ input[type=submit]{
     text-align: center;
 }
 .column{
-    max-width: 100%;
-    height: 25%;
+    flex: 0 0 25%;
     background-color:gray;
-    display:-webkit-flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
+    /* //display:-webkit-flex; */
+    display:flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items:stretch;
 }
 .columnItem{
     display: flex;
@@ -241,27 +240,26 @@ a:link,a,a:visited{
 }
 /* 이가온 부분 */
 .box {
-    max-width: 100%;  height:20%; 
-    background-color: rgba(255, 255, 255, 0.767); 
-    position:relative; 
-    z-index: 1;
-    border-style:outset;
+    background-color:rgba(255, 255, 255, 0.767);
+    z-index:1;
+    border-style:solid;
     border-width:20px;
     border-top-width:0px;
-    /* border-bottom-color:rgba(255, 255, 255,0.938); */
     border-bottom-color:#8EAFE5;
     border-left-color:#4472C4;
     border-right-color:#4472C4;
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
+    
+    display:flex;
+    box-sizing:border-box;
+    flex: 0 0 95%;
+    flex-direction:row;
     justify-content:flex-start;
+    align-items:flex-end;
+
 }
 .line{
     max-width: 100%;  height: 0.8%; 
-    background-color: rgba(255, 255, 255, 0.767); 
-    position:relative; 
-     z-index: 1;
+    background-color: rgba(255, 255, 255, 0.767);
  }
 .fixed {   
     height: 10%;
@@ -282,17 +280,9 @@ a:link,a,a:visited{
     top: 50px;
 }
 .circle{
-    
-    width:50px; height:50px; border-radius:50px;
+    width: 37px;; height:34px; border-radius:50px;
     background-color: #f8b600;
-    position: relative;
-    display:flex;
-    flex-direction: column;
-    justify-content: center;
     text-align: center;
-    margin: 2;
-
-  
 }
 .plus{
 left:310px;
@@ -311,15 +301,21 @@ bottom: 15px;
     position:relative; 
     border-radius:10px;
 }
-.cycle{
-    width:18%; height:10%;
-    background-color: rgb(255, 255, 255); 
-    position:relative; 
-    border-radius:40px ;
-    display: inline-block;
-    margin-bottom: 1%;
-    font-size:15px;
-    margin-left: 1%;
+.ingrd_list{
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 24%;
+    width:24%;
+    height: 15%;
+    align-items:center;
+    margin: 0 1 10 0;
+}
+.ingrd_thumb{
+    
+    border-radius: 40px;
+    width:100%;
+    background-color:white;
+    flex: 0 0 80%;
 }
 .classify{
     position:relative; 
