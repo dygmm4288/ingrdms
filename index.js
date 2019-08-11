@@ -3,7 +3,14 @@ const express = require('express'),
       template = require('./lib/template'),
       session = require('express-session'),
       bodyParser = require('body-parser'),
-      path =require('path');
+      path =require('path'),
+      doAsync = fn => async (req,res,next) => {
+          try {
+          await fn(req,res,next);
+          } catch(err){
+              next(err);
+          }
+        };
 //func
 var func = (function Func() {
     if(!(this instanceof Func)) {
@@ -98,6 +105,12 @@ app.get('/login',(req,res)=>{
     </div>
    </div>
 </div>
+`,`
+    $(document).ready(()=> {
+        $('form').submit((e) => {
+            e.preventDefault();
+        })
+    });
 `);
 res.send(html);
 }
@@ -277,19 +290,44 @@ app.get('/logout',(req,res)=>{
 })
 app.get('/refrigerator',(req,res)=>{
 var title = "Refrigerator Page",
-    checkResult = func.checkUser(req.session);
+    checkResult = func.checkUser(req.session),
+    id = req.session.user_id || null;
 
 res.render('refrigerator',{
     title: title,
     say: checkResult.say,
     state: checkResult.state,
+    id: id
 },(err,html)=>{
     if(err) {
         throw err;
      }
       res.end(html)
 });
-})
+});
+app.get('/getRecipe',(req,res) => {
+    //var user_id = req.query.user_id,
+    var user_id = 'dygmm4288',
+        query = 'select ing_name from ingredient_u where ingUser_id = ?';
+
+    const DataBase = require('./public/js/DataBase'),
+          database = new DataBase();
+    try {
+    database.query(query,user_id).then((row)=>{
+        if(row.length !== 0) {
+            res.send(row);
+            }
+        else {
+            res.send([]);
+        }
+        }).catch((err) => {
+            throw err;
+        });
+    }
+    catch(err){
+        throw err;
+    }
+});
 app.get('/classify',(req,res)=>{
     var title = 'Classify Page',
         html = template.HTML(title,
@@ -411,7 +449,8 @@ $(document).ready(()=>{
         frozen.css('background-color','');
         fresh.css('background-color','lightblue');
     });
-   $("form").submit((e)=>{
+    $("form").submit((e) => {
+        e.preventDefault();
        data = $("form").serializeArray();
        flag === 1 ? data = inputData(data,"keep",frozen.val()) : data = inputData(data,"keep",fresh.val());
        data = inputData(data,"classify",$("#classify").text());
@@ -419,9 +458,9 @@ $(document).ready(()=>{
        $.ajax({
         url: "/processing",
         data: data,
-        type: "get"
-    }).done((data)=>
-    {
+        type: "get",
+        async: false
+        }).done((data)=> {
         if(data === "Success") {
             alert("등록이 완료되었습니다.");
             location.href = '/refrigerator/';
@@ -430,9 +469,9 @@ $(document).ready(()=>{
             alert("이미 등록된 재료입니다.");
             location.href = '/classify/';
         }
+    });
     })
-    })
-    
+     
 })
 `);
       res.send(html);
@@ -441,7 +480,6 @@ app.get('/processing',async (req,res)=>{
     var ingrdName = req.query.name,
    //var userid = req.session.userid;
         userid = "dygmm4288";
-
     const DataBase = require('./public/js/DataBase'),
           database = new DataBase();
 
@@ -457,13 +495,19 @@ app.get('/processing',async (req,res)=>{
                 if(row.length === 0) {
                     query = 'insert into ingredient_u values(?,?)';
                     await database.query(query,[userid,ingrdName]);
-                    await res.send("Success");
+                    response();
                 }
                 else {
-                   await res.send("Fail");
+                   reject();
                 }
-            })
-        })
+            }).then(() => {
+                res.send("Success");
+            }).catch(() => {
+                res.send("Fail");
+            });
+        }).catch((err) => {
+            throw err;
+        });
    }
 })
 app.get('/recipe',(req,res)=>{
@@ -476,8 +520,6 @@ const cheerio = require('cheerio'),
       data = require('./public/js/recipe.js')(),
       list = require('./public/js/linked_list'),
       ingrd_list = [],
-      loginModule = require('./public/js/login'),
-      login = new loginModule(),
       userData = require('./public/js/userData')(),
       DataBase = require('./public/js/DataBase'),
       database = new DataBase(),
@@ -785,49 +827,8 @@ database.query(query,userid).then((row) => {
         }))
     };
 }).catch((err) => {
-    throw err;
-});
-/*
-login.getIngrd(userid).then((rows)=>{
-    rows.forEach((v)=>{
-        arr_userData.push(new userData.UserIngrd(userid,v.ingrd_name,'좋음','500g'));
+      throw err;
     });
-    return new Promise((res,rej)=>{ 
-        res(arr_userData);
-})}).then((userData)=>{
-    userData.forEach((v)=>{
-        ingrd_list.forEach((iv)=>{ 
-             //주재료 3060001
-            if(iv.ingredient_name === v.ingrd_name && iv.ing_typeCode === '3060001')
-            {
-                var cur = recipeTable[iv.ingRecipe_id % 10]._head;
-                Recommend.first(cur,iv,v,true);
-                
-            }
-            else if (iv.ingrdient_name === v.ingrd_name){
-                var cur = recipeTable[iv.ingRecipe_id % 10]._head;
-                Recommend.first(cur,iv,v,false);
-            }
-        })
-    });
-    for(i in first_recommend) {
-        var tmp = 0,
-            prime = 0,
-            sub = 0,
-            that = first_recommend[i];
-        prime = 14*(that.prime_ingrd/that.count_ingrd);
-        sub = 6*(that.sub_ingrd/that.count_ingrd);
-        tmp = prime + sub;
-        that.weight += (tmp/20)*0.2;
-    }
-    return new Promise((res,rej)=>{
-        res(first_recommend);
-    })
-}).then((arr_recipe)=>{res.send(arr_recipe);})
-.catch((err)=>{console.log(err)});
-*/
-
-
 });
 app.get('/setRecipe',(req,res)=>{
     //const user_id = req.user_id;
@@ -866,7 +867,16 @@ app.get('/setRecipe',(req,res)=>{
     })
 })
 app.get('/test',(req,res)=>{
-    console.log(req.query);
+    res.render('test',{
+    },(err,html)=>{
+        if(err) {
+            console.log('ERR?');
+            throw err;
+            
+         }
+          res.end(html)
+    });
+    
 })
 app.get('/info',(req,res)=>{
     var title = 'In Information Page';
@@ -909,19 +919,20 @@ app.listen(3000,function(){
     
 });
 //post login
-app.post('/form_receiver',async (req,res)=>{ 
+app.post('/form_receiver',doAsync(async (req,res) => { 
     const uid = req.body.uid,
           upw = req.body.upwd,
         DataBase = require('./public/js/DataBase'),
         database = new DataBase(),
         sess = req.session;
-        let result = null;
+    let result = null;
         result = await database.login('select * from user where user_id = ?',[uid,upw]);
         if(result.flag) {
+            console.log(result);
             func.setSess(sess,uid,result.user_name);
             res.redirect('/main');
         }
         else{
             res.redirect(`/loginError/${result}`);
         }
-});
+}));

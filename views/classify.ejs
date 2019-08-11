@@ -19,7 +19,7 @@
                         align-content:flex-start;flex-wrap:wrap;">
              <% value.forEach((v)=>{%>
             <li class = "ingrd_list">
-                <input type = "button" class = "ingrd_thumb" name = "<%= v %>">
+                <input type = "image" class = "ingrd_thumb" src = "../img/egg.png" name = "<%= v %>" />
                 <strong><%= v%></strong>
             </li>
               <% }) %>
@@ -28,11 +28,34 @@
             </div>
         </div>
         <script type = "text/javascript">
-        $(document).on()
-        $(':button').click((onClick)=>{
-            var value = onClick.currentTarget.name
-            var adr = '/inif/<%- classifyId %>/'+ value;
-            location.href = adr;
+        $(document).ready(() => {
+            var data = [],
+                inputData = function(data,name,value) {
+                    return data.concat([{name:name,value:value}]);
+                };
+            $(':image').click((onClick) => {
+                var value = onClick.currentTarget.name,
+                    classify_id = '<%= classifyId %>';
+                data = inputData(data,'name',value);
+                data = inputData(data,'classify_id',classify_id);
+
+                $.ajax({
+                    url:"/processing",
+                    data: data,
+                    type: "get",
+                    async: false
+                }).done((data) => {
+                    if( data === "Sucess") {
+                        alert("등록이 완료되었습니다.");
+                        location.href = '/refrigerator/';
+                    }
+                    else if(data === "Fail") {
+                        alert("이미 등록된 재료입니다.");
+                        location.href = '/classify/';
+                    }
+                });
+
+            })
         })
         </script>
     </body>

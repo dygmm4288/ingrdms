@@ -241,20 +241,18 @@ a:link,a,a:visited{
 /* 이가온 부분 */
 .box {
     background-color:rgba(255, 255, 255, 0.767);
-    z-index:1;
     border-style:solid;
     border-width:20px;
     border-top-width:0px;
     border-bottom-color:#8EAFE5;
     border-left-color:#4472C4;
     border-right-color:#4472C4;
-    
-    display:flex;
     box-sizing:border-box;
+
+    display:flex;
     flex: 0 0 95%;
     flex-direction:row;
     justify-content:flex-start;
-    align-items:flex-end;
 
 }
 .line{
@@ -305,17 +303,16 @@ bottom: 15px;
     display: flex;
     flex-direction: column;
     flex: 0 0 24%;
-    width:24%;
-    height: 15%;
     align-items:center;
     margin: 0 1 10 0;
 }
 .ingrd_thumb{
-    
     border-radius: 40px;
-    width:100%;
     background-color:white;
-    flex: 0 0 80%;
+    max-width: 80%;
+
+    align-self: center;
+
 }
 .classify{
     position:relative; 
@@ -388,9 +385,10 @@ bottom: 15px;
 }
 .recipe_item {
     display: flex;
-    flex-direction:column;
-    flex-basis: 50%;
-   
+    flex-direction: column;
+    flex:0 0 25%;
+    justify-content: flex-start;
+
 }
 .thumb {
     margin: 0 auto;
@@ -402,5 +400,12 @@ bottom: 15px;
     min-height: 0;
     margin-top: 5px;
     font-size: 13px;
+}
+.box .title {
+    flex: 0 1 10%;
+
+}
+.box > a {
+    align-self:flex-end;
 }
 

@@ -21,7 +21,7 @@
     <div class = "content">
         <% for (var i = 0;i<4;i++){ %>
         <div class = "column">
-            <div class="box">
+            <div class="box" id = <%= i+1 %>>
                 <A href="/classify">
                     <input 
                     type="button" 
@@ -43,23 +43,31 @@
         </div>                  
     </div>
     <script type = "text/javascript">
-        $(document).ready(function() {
-            $('.app').css('background','url("")');
-            $.ajax({
-      url: "/getRecipe", // 클라이언트가 요청을 보낼 서버의 URL 주소
-      data: { user_id: user_id},                // HTTP 요청과 함께 서버로 보낼 데이터
-      type: "GET",                             // HTTP 요청 방식(GET, POST)
-      dataType: "json",
-      success: function(data){
-      if(data === true){
-        alert('선택이 완료되었습니다.');
-      }
-      else{
-        alert('선택이 완료되었습니다.(fail)');
-      }
-      }
+    $(document).ready(function() {
+        $('.app').css('background','url("")');
+        var user_id = '<%= id %>';
+        $.ajax({
+            url: "/getRecipe", // 클라이언트가 요청을 보낼 서버의 URL 주소
+            data: { user_id: user_id},                // HTTP 요청과 함께 서버로 보낼 데이터
+            type: "GET",                             // HTTP 요청 방식(GET, POST)
+            dataType: "json",
+            async: false,
+            success: function(data) {
+                var id = 1,
+                insert_element = null;
+                data.forEach((value)=>{
+                    insert_element = `
+                    <div class = "recipe_item">
+                        <input type = "image" class = "ingrd_thumb" src = "../img/shirmp.jpg"/>
+                        <div style = "flex: 0 1 10%; background-color:red"></div>
+                        <strong>${value.ing_name}</strong>
+                    </div>`
+                    $(insert_element).prependTo(`#${id}`);
+                });
+            }
+         }).done((data) => {
+        });
     });
-        })
     </script>
     </body>
 </html>
