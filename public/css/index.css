@@ -1,25 +1,13 @@
-
+ /* 초기화코드 */
  * {
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+    margin:0; padding:0;
 }
-
 body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
     background-color: #d2d2d2;
-    /*background-image:linear-gradient(top, #c7e9ff 0%, #a7d7f7 51%);
-    background-image:-webkit-linear-gradient(top, #c7e9ff 0%, #a7d7f7 51%);
-    background-image:-ms-linear-gradient(top, #c7e9ff 0%, #a7d7f7 51%);
-    background-image:-webkit-gradient(
-        linear,
-        left top,
-        left bottom,
-        color-stop(0, #a7d7f7),
-        color-stop(0.51, #a7d7f7)
-    );
-    background-attachment:fixed;*/
-
     font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
     font-size:12px;
     height:100%;    
@@ -28,55 +16,114 @@ body {
     text-transform:uppercase;
     width:100%;
 }
-/*이진호 부분*/
-/* Portrait layout (default)  411*823 */
+li {
+    list-style:none;
+}
+a {
+    text-decoration:none;
+}
 .app {
-  /*  background:url(../img/refrigerator.jpg) no-repeat center top; /* 170px x 200px */
-  /*  position:absolute;             /* position in the center of the screen */
-  /*  left:50%;
-    top:50%;
-    height:50px;                   /* text area height */
-  /*  width:200px;                   /* text area width */
-   /* text-align:center;
-    padding:150px 20px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
-    /*margin:-115px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
-                                   /* offset horizontal: half of text area width */
-    max-width: 350px;
-    height: 600px;
+    max-width: 100%;
+    height: 100%;
     margin: 0 auto; 
-    position: relative;
-    top: 50px;
     text-align:center;
     background:url(../img/refrigerator.png) no-repeat center;
     background-size: 350px 350px;
-    background-position: 10px 20px;
+    background-position: center 30%;
 }
-.main{
-  
-    text-align:center;
+#main_header{
+    max-width: 100%;
+    height: 10%;
+    display:flex;
+    flex-direction:row;
+    justify-content: space-between;
+    padding-right: 10px;
+    text-align: center;
+    line-height: 15px;
+    background-color:orange;
+}
+.content{
+    display: flex;
+    max-width:100%;
+    height: 80%;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+}
+#main_footer{
+    display: flex;
+    max-width:100%;
+    height: 10%;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color:orange;
+}
+/*이진호 부분*/
+    /* 헤더부분 */
+#user_menu {
+    flex-basis: 20%;
+    background:url('../img/user_menu.png') center no-repeat;
+    background-size: 60%;
+}
+#login_btn {
+    flex: 0 0 20%;
+    border-radius:20px;
+    background-color:white;
+    align-self: center;
+}
+#main_header > h1 {
+    align-self: center; 
+    color: white;
+}
+#main_header > h3 {
+    align-self: center;
+    color: white;
+}
+    /* 푸터 부분 */
+#back {
+    flex: 0 0 20%;
+    background:url('../img/back_icon.png') center no-repeat;
+    background-size: 60%;
+    border:0;
+}
+#reload {
+    flex: 0 0 20%;
+    background:url('../img/reload_icon.png') center no-repeat;
+    background-size: 60%;
+    border:0;
+}
+#home {
+    flex: 0 0 20%;
+    background:url('../img/home_icon.png') center no-repeat;
+    background-size: 60%;
+    border:0;
+}
+    /* content부분 */
+.service_btn {
+    width: 100%;
+    height: 10%;
+    font-size: 16px;
+    background-color: white;
+    border-radius: 10px;
+    margin-top: 10px;
 }
 input[type=text], input[type=password]{
-    block-size:45px;
-    display: inline-block;
-    width: 75%;
+    block-size: 10%;
     border: 1px solid #ccc;
     border-radius: 10px;
-    box-sizing:border-box;
-    padding: 10px;
+    width:80%;
 }
 input[type=text]:focus,input[type=password]:focus{
     background-color: lightblue;
 }
-.skipButton{
+.submitButton {
     animation:fade 4000ms infinite;
-    -webkit-animation:fade 4000ms infinite;
-    block-size:30px;
-    width: 45%;
-    position:relative;
-    top:10px;
+    -webkit-animation: fade 4000ms infinite;
+    block-size: 5%;
+    width:45%;
     border: 1px solid #ccc;
-    font-size:16px;
-    border-radius:8px; 
+    font-size: 16px;
+    border-radius:8px;
     background-color: gray;
 }
 input[type=submit]{
@@ -91,56 +138,58 @@ input[type=submit]{
     border-radius:8px;
     background-color: gray;
 }
-.loginForm{
-    position:relative;
-    top: 50%;    
-}
-.subLogin{
-    text-align:center;
-    position:relative;
-    top: 30px;
-}
-.topLogin{
-    text-align: right;
-    justify-items: center;
-    position: relative;
-    max-width:350px;
-    height: 50px;
-}
-.content{
-    display: flex;
-    max-width:100%;
-    height: 80%;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-.footer{
-    display: flex;
-    max-width:100%;
-    height: 10%;
-    position: relative;
-}
 .stateButton{
     background-color: #f8b600;
     border-radius: 8px;
     font: bold;
     border-color: #f8b600;
 }
-.header{
-    max-width: 100%;
-    height: 10%;
-    text-align: center;
-}
 .column{
     flex: 0 0 25%;
     background-color:gray;
-    /* //display:-webkit-flex; */
     display:flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items:stretch;
 }
-.columnItem{
+.floor {
+    background-color:rgba(255, 255, 255, 0.767);
+    border-style:solid;
+    border-width:20px;
+    border-top-width:0px;
+    border-bottom-color:#8EAFE5;
+    border-left-color:#4472C4;
+    border-right-color:#4472C4;
+    box-sizing:border-box;
+
+    display:flex;
+    flex: 0 0 95%;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+.line{
+    max-width: 100%;
+    flex: 0 0 5%;
+    background-color: rgba(255, 255, 255, 0.767);
+ }
+ #popup {
+    position:fixed;
+    width: 0px;
+    height: 0px;
+    top:0px;
+    display:none;
+
+ }
+ #mask {
+     position:absolute;
+     left:0;
+     top:0;
+     z-index:9000;
+     background-color:#000;
+     display:none;
+ }
+ 
+/* .columnItem{
     display: flex;
     min-width: 40%;
     max-width: 40%;
@@ -169,9 +218,9 @@ input[type=submit]{
     display : flex;
     flex-direction: row;
     align-items: stretch;
-}
+} */
 #cancle_btn{
-    -webkit-animation:fade 4000ms infinite;
+   /* -webkit-animation:fade 4000ms infinite;*/
     block-size:30px;
     width: 45%;
     position:relative;
@@ -183,15 +232,6 @@ input[type=submit]{
 }
 /*Landscape layout (with min-width) */
 
-
-h1 {
-    font-size:24px;
-    font-weight:normal;
-    margin:0px;
-    overflow:visible;
-    padding:0px;
-    text-align:center;
-}
 
 .event {
     border-radius:4px;
@@ -239,26 +279,7 @@ a:link,a,a:visited{
     color:black;
 }
 /* 이가온 부분 */
-.box {
-    background-color:rgba(255, 255, 255, 0.767);
-    border-style:solid;
-    border-width:20px;
-    border-top-width:0px;
-    border-bottom-color:#8EAFE5;
-    border-left-color:#4472C4;
-    border-right-color:#4472C4;
-    box-sizing:border-box;
 
-    display:flex;
-    flex: 0 0 95%;
-    flex-direction:row;
-    justify-content:flex-start;
-
-}
-.line{
-    max-width: 100%;  height: 0.8%; 
-    background-color: rgba(255, 255, 255, 0.767);
- }
 .fixed {   
     height: 10%;
     position: relative;
@@ -406,6 +427,6 @@ bottom: 15px;
 
 }
 .box > a {
-    align-self:flex-end;
+    align-self:center;
 }
 

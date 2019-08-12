@@ -11,6 +11,7 @@ const mysql = require('mysql'),
             this.err_level = null;
             try{
               this.connection = mysql.createConnection(config);
+              this.connection = mysql.createPool(config);
             }
             catch(err){
                 console.log('CONNECTION ERROR');
@@ -23,7 +24,8 @@ const mysql = require('mysql'),
                         return rej(err);
                     }
                     res(row);   
-                })
+                });
+               
             });
           };
           DataBase.prototype.close = function() {
@@ -42,6 +44,7 @@ const mysql = require('mysql'),
                   err_level = null;
             return new Promise((res,rej) =>{
                 this.query(sql,uid).then(row => {
+                    this.close().then(() => { console.log('Closing Connection');});
                     if(row.length === 0) {
                         err_level = 1;
                         rej(err_level);
@@ -53,15 +56,9 @@ const mysql = require('mysql'),
                         err_level = 2;
                         rej(err_level);
                     }
-                    this.close().catch((err)=>{
-                        console.log('Closing Error');
-                    throw err;
                 });
-                })
-            }).then((user_name) => {
-                var flag = true;
+            }).then(function(user_name) {
                 return {
-                    flag: flag,
                     user_name: user_name
                 };
             })

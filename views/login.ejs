@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <title>Login Page</title>
+    </head>
+    <body>
+        <div class = "app">
+            <header class = "#main_header">
+            </header>
+            <div class = "content">
+                <form action= "/form_receiver" method ="POST">
+                    <input type = "text"  size = "25" name ="uid" placeholder = "Enter User ID" required autofocus />
+                    <input type = "password" size = "25" name = "upwd" placeholder = "Enter User PassWord" required/>
+                    <div>
+                        <input type = "submit" class = "submitButton" id = "loginButton" value = "로그인"/>
+                        <input type = "button" class = "submitButton" id = "skipButton" value = "건너뛰기"/>
+                    </div>
+                </form>
+                <div>
+                        <a href="/findUser">아이디 비밀번호 찾기</a> / 
+                        <a href= "/signUp">회원가입</a>
+                </div>
+            </div>
+            <div class = "footer">
+
+            </div>
+        </div>
+        <script>
+            $(document).ready(() => {
+                $('#skipButton').click(()=>{
+               location.href = 'main';
+               });
+                
+            })
+           
+        </script>
+    </body>
+</html>

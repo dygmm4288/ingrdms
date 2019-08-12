@@ -69,52 +69,23 @@ app.use(session({
 //get
 
 app.get('/',(req,res)=>{
-    var title = 'Welcome',
-        html = template.HTML(title,
-`<div class = "app">
-    <div class ="content">
-        <p style = "font-family:굴림;font-size:20;">이에이송의 <br>
-        음식물쓰레기 줄이기 프로젝트</p>
-        <p style = "font-size:30; margin:3 auto">지금 시작합니다!</p>
-        <div class = "blink">
-        <a href = "/login"><p class = "event listening">시작하기</p></a>
-        </div>
-        
-    </div>
- </div>`)
-res.send(html);
+    res.render('welcome',{},(err,html) => {
+        if(err) {
+            console.log('err?');
+            throw err;
+        }
+        res.end(html)
+    });
 });
 app.get('/login',(req,res)=>{   
-    var title = 'Login Page';
-    if(req.session.user_id) {
-        res.redirect('/main');
-    }
-    else {
-    var html = template.HTML(title,`
-    <div class = "app">
-    <div class = "loginForm">
-        <form class = "loginForm" action = "/form_receiver" name = "loginForm" id = "loginForm" method = "POST">
-            <input type = "text"  size = "25" name ="uid" placeholder = "Enter User ID" required autofocus ><br>
-            <input type = "password" size = "25" name = "upwd" placeholder = "Enter User PassWord" required><br>
-            <input type = "submit" value = "로그인">
-            <a href = "/main"><input type = "button" class = "skipButton"  value = "건너뛰기">
-         </form>
-    <div class ="subLogin">
-        <a href="/findUser">아이디 비밀번호 찾기</a>&nbsp&nbsp
-        /&nbsp&nbsp <a href= "/signUp">회원가입</a>
-    </div>
-   </div>
-</div>
-`,`
-    $(document).ready(()=> {
-        $('form').submit((e) => {
-            e.preventDefault();
-        })
+    res.render('login',{},(err,html) => {
+        if(err) {
+            console.log('err?');
+            throw err;
+        }
+        res.end(html)
     });
-`);
-res.send(html);
-}
-})
+});
 app.get('/loginError/:level',(req,res)=>{
     var title = 'Login Page',
         append = '';
@@ -130,20 +101,26 @@ app.get('/loginError/:level',(req,res)=>{
     }
     var html = template.HTML(title,`
     <div class = "app">
-    <div class = "loginForm">
-        <form class = "loginForm" action = "/form_receiver" name = "loginForm" id = "loginForm" method = "POST">
-            <input type = "text"  size = "25" name ="uid" placeholder = "Enter User ID" required autofocus ><br>
-            <input type = "password" size = "25" name = "upwd" placeholder = "Enter User PassWord" required><br>
-            ${append}
-            <input type = "submit" value = "로그인">
-            <a href = "/main"><input type = "button" class = "skipButton"  value = "건너뛰기">
-         </form>
-    <div class ="subLogin">
-        <a href="/findUser">아이디 비밀번호 찾기</a>&nbsp&nbsp
-        /&nbsp&nbsp <a href= "/signUp">회원가입</a>
-    </div>
-   </div>
-</div>
+            <header class = "header">
+            </header>
+            <div class = "content">
+                ${append}
+                <form action= "/form_receiver" method ="POST">
+                    <input type = "text"  size = "25" name ="uid" placeholder = "Enter User ID" required autofocus />
+                    <input type = "password" size = "25" name = "upwd" placeholder = "Enter User PassWord" required/>
+                    <div>
+                        <input type = "submit" class = "submitButton" id = "loginButton" value = "로그인"/>
+                        <input type = "button" class = "submitButton" id = "skipButton" value = "건너뛰기"/>
+                    </div>
+                </form>
+                <div>
+                        <a href="/findUser">아이디 비밀번호 찾기</a> / 
+                        <a href= "/signUp">회원가입</a>
+                </div>
+            </div>
+            <div class = "footer">
+            </div>
+        </div>
 `);
 res.send(html);
 })
@@ -236,48 +213,55 @@ app.get('/signUp',(req,res)=>{
 });
 
 app.get('/main',(req,res)=>{
-    var title = 'Main Page',
-        checkResult = func.checkUser(req.session),
-        html = template.HTML(title,`
-    <div class="app">
-        <div class = "topLogin">
-        ${checkResult.say}
-        <input type = "button"
-        class = "stateButton"
-        onclick = "stateclick()" 
-        id = state 
-        value = "${checkResult.state}">
-        </div>
-        <div class = "content">
-            <input type = "button" class = "fixed"
-             value = "냉장고 관리" onclick = "goRefri()"/>
-            <input type = "button" class = "fixed"
-             value = "레시피 추천" onclick = "goRecipe()"/>     
-        </div>
-    </div>    
-`,`function goRefri() {
-    location.href ='./refrigerator';
-    };
-    function goRecipe(){
-        location.href = './recipe';
-    };
-    function stateclick() {
-        var state = document.getElementById('state');
-        console.log(state);
-        if(state.value === '로그인')
-        {
-            console.log('location to login');
-            location.href = '/login/';
-        }
-        else if(state.value === '로그아웃')
-        {
-            console.log('location to logout');
-            location.href = '/logout/';
+//     var title = 'Main Page',
+//         checkResult = func.checkUser(req.session),
+//         html = template.HTML(title,`
+//     <div class="app">
+//         <div class = "topLogin">
+//         ${checkResult.say}
+//         <input type = "button"
+//         class = "stateButton"
+//         onclick = "stateclick()" 
+//         id = state 
+//         value = "${checkResult.state}">
+//         </div>
+//         <div class = "content">
+//             <input type = "button" class = "fixed"
+//              value = "냉장고 관리" onclick = "goRefri()"/>
+//             <input type = "button" class = "fixed"
+//              value = "레시피 추천" onclick = "goRecipe()"/>     
+//         </div>
+//     </div>    
+// `,`function goRefri() {
+//     location.href ='./refrigerator';
+//     };
+//     function goRecipe(){
+//         location.href = './recipe';
+//     };
+//     function stateclick() {
+//         var state = document.getElementById('state');
+//         console.log(state);
+//         if(state.value === '로그인')
+//         {
+//             console.log('location to login');
+//             location.href = '/login/';
+//         }
+//         else if(state.value === '로그아웃')
+//         {
+//             console.log('location to logout');
+//             location.href = '/logout/';
 
-        }
-    }`   );
+//         }
+//     }`   );
 
-res.send(html);
+// res.send(html);
+    res.render('main',(err,html) => {
+        if(err) {
+            console.log('Main Page Error Rendering Error'+err);
+            throw err;
+        }
+        res.end(html);
+    })
 })
 app.get('/logout',(req,res)=>{
     
@@ -918,21 +902,22 @@ app.listen(3000,function(){
     console.log('Connected 3000');
     
 });
-//post login
-app.post('/form_receiver',doAsync(async (req,res) => { 
+
+app.post('/form_receiver',async (req,res) => { 
     const uid = req.body.uid,
           upw = req.body.upwd,
         DataBase = require('./public/js/DataBase'),
         database = new DataBase(),
         sess = req.session;
     let result = null;
-        result = await database.login('select * from user where user_id = ?',[uid,upw]);
-        if(result.flag) {
-            console.log(result);
-            func.setSess(sess,uid,result.user_name);
-            res.redirect('/main');
-        }
-        else{
-            res.redirect(`/loginError/${result}`);
-        }
-}));
+    result = await database.login('select * from user where user_id = ?',[uid,upw]);
+    if(typeof result === 'object') {
+        func.setSess(sess,uid,result.user_name);
+        console.log('login success');
+        res.redirect('/main');
+    }
+    else {
+        console.log('login fail');
+        res.redirect(`loginError/${result}`);
+    }
+});

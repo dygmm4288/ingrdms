@@ -1,73 +1,91 @@
 <html>
-        <head>
-        <meta charset="utf-8" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-        <link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
-        <title><%= title %> </title>
-        
-</head>
-<body>
-    <div class="app">    
-    <div class = "topLogin">
-        <%= say %>
-        <input type = "button"
-        class = "stateButton"
-        id = "state" 
-        value = <%= state %> />
-    </div>  
-    <div class = "content">
-        <% for (var i = 0;i<4;i++){ %>
-        <div class = "column">
-            <div class="box" id = <%= i+1 %>>
-                <A href="/classify">
-                    <input 
-                    type="button" 
-                    class="circle" 
-                    style = "font-size: 20px;align-items:center;"
-                    value = "+"
-                    >
-                </A>
-            </div>
-            <div class="line">
-            </div>
+        <title>Refrigerator Page</title>
+    </head>
+    <body>
+        <div id="mask"></div>
+        <div id="popup">
+            아 제발 드디어 여기에 채워넣기만 하면 되게 해주세요
         </div>
-    <% } %>
-    </div>
-        <div 
-        class = "footer" 
-        style = "flex-direction:row; justify-content:flex-end">
+        <div class="app">    
+            <header id="main_header">
+                <aside id="user_menu"></aside>
+                <h3>RefrigeratorPage</h3>
+                <button id = "login_btn">로그인</button>
+            </header>
+            <div class="content">
+            <% for(var i =0 ;i<4;i++){ %>
+                <div class="column">
+                    <div class="floor" id = <%= i+1 %>>
+                        <a href="/classify" style = "align-self:center">
+                            <input type="button" class="circle" style = "font-size:20px"
+                            value = "+">
+                        </a>
+                    </div>
+                    <div class="line"></div>
+                </div>
+            <% } %>
+            </div>
+            <nav id="main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+            </nav>
+        </div>
+        <script type = "text/javascript">
         
-        </div>                  
-    </div>
-    <script type = "text/javascript">
-    $(document).ready(function() {
-        $('.app').css('background','url("")');
-        var user_id = '<%= id %>';
-        $.ajax({
-            url: "/getRecipe", // 클라이언트가 요청을 보낼 서버의 URL 주소
-            data: { user_id: user_id},                // HTTP 요청과 함께 서버로 보낼 데이터
-            type: "GET",                             // HTTP 요청 방식(GET, POST)
-            dataType: "json",
-            async: false,
-            success: function(data) {
+        $(document).ready(function() {
+            function wrapWindow() {
+            var maskHeight = $(document).height(),
+                maskWidth = $(window).width();
+            $('#mask').css({'width':maskWidth,'height':maskHeight});
+            $('#mask').fadeTo("slow",0.5);
+        }
+            $('.app').css('background','url("")');
+            $('#popup').hide();
+            var user_id = '<%= id %>';
+            $.ajax({
+                url: "/getRecipe", // 클라이언트가 요청을 보낼 서버의 URL 주소
+                data: { user_id: user_id},                // HTTP 요청과 함께 서버로 보낼 데이터
+                type: "GET",                             // HTTP 요청 방식(GET, POST)
+                dataType: "json",
+                async: false,
+                success: function(data) {
                 var id = 1,
                 insert_element = null;
                 data.forEach((value)=>{
-                    insert_element = `
-                    <div class = "recipe_item">
-                        <input type = "image" class = "ingrd_thumb" src = "../img/shirmp.jpg"/>
-                        <div style = "flex: 0 1 10%; background-color:red"></div>
-                        <strong>${value.ing_name}</strong>
-                    </div>`
-                    $(insert_element).prependTo(`#${id}`);
+                insert_element = `
+                <div class = "recipe_item">
+                <input type = "image" class = "ingrd_thumb" src = "../img/shirmp.jpg"/>
+                <div style = "flex: 0 1 10%; background-color:green"></div>
+                <strong>${value.ing_name}</strong>
+                </div>`
+                $(insert_element).prependTo(`#${id}`);
                 });
-            }
-         }).done((data) => {
-        });
+                }
+            });
+            $('.floor > .recipe_item').click(function(e) {
+                e.preventDefault();
+                var width = $('.content').width(),
+                    height = $('.content').height(),
+                    windowHeight = $(window).height();
+                wrapWindow();
+                console.log(width,height);
+                $('#popup').css({'width':width,'height':height/2,'top':windowHeight/2});
+                $('#popup').show();
+            })
+            $('#mask').click(function() {
+                $(this).hide();
+                $('#popup').hide();
+            })
+            
+
+
     });
-    </script>
+        
+        </script>
     </body>
 </html>
