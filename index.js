@@ -315,32 +315,46 @@ app.get('/getRecipe',(req,res) => {
 app.get('/classify',(req,res)=>{
     var title = 'Classify Page',
         html = template.HTML(title,
-        `<div class="all">
-           <div class = "header" id = "header"> 
-            <font size="6px" color="#f8b600"><b>분류</b></font>
+        `<div class="app">
+           <header id = "main_header"> 
+                <aside id="user_menu"></aside>
+                <h1>분류</h1>
+                <button id="login_btn">로그인</button>
+           </header>
+           <div class = "content">
+               <input type="button" class="btn_classify" value = "육류">
+               <input type="button" class="btn_classify" value = "채소">
+               <input type="button" class="btn_classify" value = "과일">
+               <input type="button" class="btn_classify" value = "수산물">
+               <input type="button" class="btn_classify" value = "양념&소스">
+               <input type="button" class="btn_classify" value = "가공&유제품">
+               <input type="button" class="btn_classify" value = "기타">
            </div>
-            <div class = "content" id = "content">
-                <input type="button" class="button" value = "육류">
-                <input type="button" class="button" value = "채소">
-                <input type="button" class="button" value = "과일">
-                <input type="button" class="button" value = "수산물">
-                <input type="button" class="button" value = "양념&소스">
-                <input type="button" class="button" value = "가공&유제품">
-                <input type="button" class="button" value = "기타">
-            </div>
+           <nav id = "main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+           </nav>
         </div>`,
         `
            $(':button').click((onClick)=>{
            var value = onClick.currentTarget.value;
            var adr = '/classify/'+value;
            location.href = adr;
-        })`);
+            });
+            $('#back').click(() => {
+                location.href = '/refrigerator';
+            });
+            $('#reload').click(() => {
+                location.reload();
+            });
+            $('#user_menu').click(() => {
+                location.href = '/main';
+            })`);
 res.send(html);
 });
 app.get('/classify/:classifyId',(req,res)=>{
     const classify = require('./public/js/classify');
-    var param = null,
-    title = "Classify Page";
+    var param = null;
     switch(req.params.classifyId){
         case '육류':
             param = classify.Meat;
@@ -368,7 +382,6 @@ app.get('/classify/:classifyId',(req,res)=>{
             break;
     }
     res.render('classify',{
-        title: title,
         value: param,
         classifyId: req.params.classifyId,   
     },(err,html)=>{if(err)throw err; res.end(html)});
@@ -465,7 +478,8 @@ app.get('/processing',async (req,res)=>{
    //var userid = req.session.userid;
         userid = "dygmm4288";
     const DataBase = require('./public/js/DataBase'),
-          database = new DataBase();
+          database = new DataBase(),
+          router = this;
 
    //사용자 정보가 없는 경우
     if(userid === undefined) { 
@@ -474,24 +488,28 @@ app.get('/processing',async (req,res)=>{
       //사용자 정보가 있는 경우
     else {
         var query = 'select ing_name from ingredient_u where ingUser_id = ? and ing_name = ?';
-        await database.query(query,[userid,ingrdName]).then((row) =>{
-            return new Promise(async (response,reject) => {
-                if(row.length === 0) {
-                    query = 'insert into ingredient_u values(?,?)';
-                    await database.query(query,[userid,ingrdName]);
-                    response();
-                }
-                else {
-                   reject();
-                }
-            }).then(() => {
-                res.send("Success");
-            }).catch(() => {
-                res.send("Fail");
+        try{
+            await database.query(query,[userid,ingrdName]).then((row) =>{
+                return new Promise(async (response,reject) => {
+                    if(row.length === 0) {
+                        query = 'insert into ingredient_u values(?,?)';
+                        await database.query(query,[userid,ingrdName]);
+                        response();
+                    }
+                    else {
+                       reject();
+                    }
+                }).then(() => {
+                    console.log('insert is success');
+                    res.send("Success");
+                }).catch(() => {
+                    res.send("Fail");
+                });
             });
-        }).catch((err) => {
+        } catch(err) {
+            console.log('Async Error');
             throw err;
-        });
+        }
    }
 })
 app.get('/recipe',(req,res)=>{

@@ -1,17 +1,17 @@
 <html>
-        <head>
-        <meta charset="utf-8" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-        <link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
-        <title><%= title %> </title>
-        
+        <title>Classify Page</title>
     </head>
     <body>
-        <div class="all">
-            <div class ="header">
+        <div class="app">
+            <div id="main_header">
+                <aside id="user_menu"></aside>
+                <h1>Classify Page</h1>
+                <button id="login_btn">로그인</button>
             </div>
             <ul class = "content"
                 style = "margin:0;padding:0;
@@ -24,19 +24,27 @@
             </li>
               <% }) %>
             </ul>   
-            <div class = "footer">
+            <div id = "main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
             </div>
         </div>
         <script type = "text/javascript">
         $(document).ready(() => {
+            $('.app').css('background','url()');
             var data = [],
                 inputData = function(data,name,value) {
                     return data.concat([{name:name,value:value}]);
                 };
-            $(':image').click((onClick) => {
-                var value = onClick.currentTarget.name,
-                    classify_id = '<%= classifyId %>';
-                data = inputData(data,'name',value);
+            $('.ingrd_thumb').click((onClick) => {
+                var current = onClick.currentTarget.name,
+                    classify_id = `<%= classifyId %>`,
+                    date = new Date(),
+                    year = date.getFullYear(),
+                    month = date.getMonth().length === 1 ? '0'+date.getMonth() : date.getMonth(),
+                    day = date.getDay(),
+                    current_date = `${year}-${month}-${day}`;
+                data = inputData(data,'name',current);
                 data = inputData(data,'classify_id',classify_id);
 
                 $.ajax({
@@ -45,17 +53,26 @@
                     type: "get",
                     async: false
                 }).done((data) => {
-                    if( data === "Sucess") {
+                    if( data === "Success") {
+                        console.log('성공');
                         alert("등록이 완료되었습니다.");
-                        location.href = '/refrigerator/';
                     }
                     else if(data === "Fail") {
                         alert("이미 등록된 재료입니다.");
-                        location.href = '/classify/';
                     }
+                }).always(() => {
+                    data = [];
                 });
-
-            })
+            });
+        $('#back').click(() => {
+            location.href = '/classify';
+        });
+        $('#reload').click(() => {
+            location.reload();
+        });
+        $('#user_menu').click(() => {
+            location.href = '/main';
+        });
         })
         </script>
     </body>

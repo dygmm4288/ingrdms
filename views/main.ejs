@@ -32,7 +32,13 @@
                     else {
                         location.href = '/recipe';
                     }
-                })
+                });
+                $('#reload').click(() => {
+                    location.reload();
+                });
+                $('#user_menu').click(() => {
+                 location.href = '/main';
+                }); 
             })
         </script>
     </body>

@@ -29,7 +29,7 @@ a {
     text-align:center;
     background:url(../img/refrigerator.png) no-repeat center;
     background-size: 350px 350px;
-    background-position: center 30%;
+    background-position-y:20%;
 }
 #main_header{
     max-width: 100%;
@@ -58,12 +58,12 @@ a {
     justify-content: space-between;
     background-color:orange;
 }
-/*이진호 부분*/
     /* 헤더부분 */
 #user_menu {
     flex-basis: 20%;
-    background:url('../img/user_menu.png') center no-repeat;
-    background-size: 60%;
+    background:url('../img/home_icon.png') center no-repeat;
+    background-size: 45%;
+    border: 0;
 }
 #login_btn {
     flex: 0 0 20%;
@@ -112,6 +112,7 @@ input[type=text], input[type=password]{
     border: 1px solid #ccc;
     border-radius: 10px;
     width:80%;
+    margin-bottom:5px;
 }
 input[type=text]:focus,input[type=password]:focus{
     background-color: lightblue;
@@ -123,18 +124,6 @@ input[type=text]:focus,input[type=password]:focus{
     width:45%;
     border: 1px solid #ccc;
     font-size: 16px;
-    border-radius:8px;
-    background-color: gray;
-}
-input[type=submit]{
-    animation:fade 4000ms infinite;
-    -webkit-animation:fade 4000ms infinite;
-    block-size:30px;
-    width: 45%;
-    position:relative;
-    top:10px;
-    border: 1px solid #ccc;
-    font-size:16px;
     border-radius:8px;
     background-color: gray;
 }
@@ -154,13 +143,13 @@ input[type=submit]{
 }
 .floor {
     background-color:rgba(255, 255, 255, 0.767);
-    border-style:solid;
+    border:solid;
     border-width:20px;
     border-top-width:0px;
     border-bottom-color:#8EAFE5;
     border-left-color:#4472C4;
     border-right-color:#4472C4;
-    box-sizing:border-box;
+    /* box-sizing:border-box; */
 
     display:flex;
     flex: 0 0 95%;
@@ -172,53 +161,94 @@ input[type=submit]{
     flex: 0 0 5%;
     background-color: rgba(255, 255, 255, 0.767);
  }
+
+        /* 팝업창 */
  #popup {
     position:fixed;
     width: 0px;
     height: 0px;
     top:0px;
-    display:none;
+    z-index:9001;
+    background-color:white;
 
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+ }
+ #popup > div{
+     flex: 0 0 33.33%;
+     display: flex;
+     justify-content: flex-start;
+ }
+ #popup > div:nth-child(1) {
+     flex-direction: row;
+     align-items: center;
+ }
+ #popup > div:nth-child(1) > div {
+     flex: 0 0 30%;
+     max-width: 30%;
+     height: 100%;
+     border-radius: 30px;
+     text-align: center;
+ }
+    /* input 날짜 */
+ #popup > div:nth-child(2) {
+     justify-content: center;
+     align-items: center;
+ }
+ #date {
+     width: 100%;
+     font-size:3em;
+     text-align:center;
+ }
+ input[type="date"]::-webkit-clear-button {
+     display:none;
+ }
+    /* 팝업 버튼 */
+ #popup > div:nth-child(3) {
+     flex-direction: column;
  }
  #mask {
      position:absolute;
      left:0;
      top:0;
      z-index:9000;
-     background-color:#000;
+     background-color:#ffffff;
      display:none;
  }
  
-/* .columnItem{
-    display: flex;
-    min-width: 40%;
-    max-width: 40%;
-    min-height: 45%;
-    max-height: 45%;
-    justify-items: center;
+        /* 버튼 */
+.btn {
+    background-color:orange;
     border-radius: 10px;
-    margin: 0 auto;
-    flex-direction: row;
+    width: 100%;
+    flex: 0 1 50%;
+    display:flex;
+    justify-content:flex-start;
+    overflow:hidden;
     align-items: center;
-    justify-content: center;
-    font-size: 20px;
+    border:solid 1px;
+    border-color: white;
 }
-.left{
-    background-color:#f8b600;
+.btn > img {
+    
+    flex: 0 4 20%;
+    max-width: 15%;
+    height: auto;
+    
 }
-.right{
+.btn > h1 {
+    flex: 0 0 70%;
+    color: white;
+    text-align:center;
+
+}
+.btn_classify {
+    flex: 0 0 14.29%;
+    border-radius: 10px;
     background-color: white;
-    border: solid;
-    display: flex;
-    flex-direction: row;
+    font-size: 1.7em;
 }
-.right_btn{
-    background-color: white;
-    border: solid;
-    display : flex;
-    flex-direction: row;
-    align-items: stretch;
-} */
 #cancle_btn{
    /* -webkit-animation:fade 4000ms infinite;*/
     block-size:30px;
@@ -274,12 +304,7 @@ input[type=submit]{
     -webkit-animation:Fade 4000ms infinite;
     background-color: #fcff4e
 }
-a:link,a,a:visited{
-    text-decoration:none;
-    color:black;
-}
 /* 이가온 부분 */
-
 .fixed {   
     height: 10%;
     position: relative;
@@ -311,7 +336,7 @@ position: absolute;
 bottom: 15px;
 
 }
-.button{
+/* .button{
     width: 100%;  height: 14.5%; 
     font-size:23px;
     color:black;
@@ -319,7 +344,7 @@ bottom: 15px;
     background-color: rgb(255, 255, 255); 
     position:relative; 
     border-radius:10px;
-}
+} */
 .ingrd_list{
     display: flex;
     flex-direction: column;

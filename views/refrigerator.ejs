@@ -9,7 +9,25 @@
     <body>
         <div id="mask"></div>
         <div id="popup">
-            아 제발 드디어 여기에 채워넣기만 하면 되게 해주세요
+           <div>
+               <div>
+                   <img src="../img/shirmp.jpg" alt="" class="ingrd_thumb">
+               </div>
+               <h1>재료이름</h1>
+           </div>
+           <div>
+               <input type="date" id="date"/>
+           </div>
+           <div>
+               <div class="btn">
+                   <img src="../img/check_icon.png" alt="">
+                   <h1>확인</h1>
+               </div>
+               <div class="btn">
+                   <img src="../img/trash_icon.png" alt="">
+                   <h1>삭제</h1>
+               </div>
+           </div>
         </div>
         <div class="app">    
             <header id="main_header">
@@ -48,9 +66,9 @@
             $('#popup').hide();
             var user_id = '<%= id %>';
             $.ajax({
-                url: "/getRecipe", // 클라이언트가 요청을 보낼 서버의 URL 주소
-                data: { user_id: user_id},                // HTTP 요청과 함께 서버로 보낼 데이터
-                type: "GET",                             // HTTP 요청 방식(GET, POST)
+                url: "/getRecipe", 
+                data: { user_id: user_id},               
+                type: "GET",                             
                 dataType: "json",
                 async: false,
                 success: function(data) {
@@ -73,13 +91,39 @@
                     height = $('.content').height(),
                     windowHeight = $(window).height();
                 wrapWindow();
-                console.log(width,height);
-                $('#popup').css({'width':width,'height':height/2,'top':windowHeight/2});
-                $('#popup').show();
-            })
+                $('#popup').css(
+                    {'width':width,
+                    'height':windowHeight/2});
+                $('#popup').animate({top:windowHeight}).promise().then(()=>{
+                    return $('#popup').show().animate({top:windowHeight/2},500);
+                });
+            });
             $('#mask').click(function() {
                 $(this).hide();
                 $('#popup').hide();
+
+            });
+            $('#back').click(() => {
+                location.href = '/main';
+            });
+            $('#reload').click(() => {
+                location.reload();
+            });
+            $('#user_menu').click(() => {
+            location.href = '/main';
+            });
+            $('.btn').click(function() {
+                var text = $(this).children('h1').text(),
+                    name = $('#popup').children('div').eq(0).children('h1').text(),
+                    date = $('#date').val();
+                    sql = '';
+                console.log(text,name,date);
+                if(text === '확인') {
+                    sql = ''
+                }
+                else if(text === '삭제') {
+                    sql = '';
+                }
             })
             
 

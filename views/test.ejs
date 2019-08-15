@@ -4,100 +4,39 @@
         <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
         <link rel="stylesheet" type="text/css" href="/css/index.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
-        <title>Refrigerator Page</title>
+        <title>Main Page</title>
     </head>
     <body>
-        <div id="mask">
+        <div class = "app">
+            <header id = "main_header">
+                <button id="user_menu"></button>
+                <h1>MainPage</h1>
+                <button id="login_btn">로그인</button>
+            </header>
+            <div class = "content">
+                <input type="button" class = "service_btn" value = "냉장고 관리"/>
+                <input type="button" class = "service_btn" value = "레시피 추천"/>
+            </div>
+            <nav id = "main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+            </nav>
         </div>
-        <div class="app">
-                <header id="main_header">
-                        <aside id="user_menu"></aside>
-                        <h3>RefrigeratorPage</h3>
-                        <button id = "login_btn">로그인</button>
-                    </header>
-                    <div class="content">
-            
-                            <div class="column">
-                                <div class="floor" id="1"><div class="recipe_item">
-                            <input type="image" class="ingrd_thumb" src="../img/shirmp.jpg">
-                            <div style="flex: 0 1 10%; background-color:green"></div>
-                            <strong>양지머리</strong>
-                            </div><div class="recipe_item">
-                            <input type="image" class="ingrd_thumb" src="../img/shirmp.jpg">
-                            <div style="flex: 0 1 10%; background-color:green"></div>
-                            <strong>쇠고기</strong>
-                            </div><div class="recipe_item">
-                            <input type="image" class="ingrd_thumb" src="../img/shirmp.jpg">
-                            <div style="flex: 0 1 10%; background-color:green"></div>
-                            <strong>돼지고기</strong>
-                            </div>
-                                    <a href="/classify" style="align-self:center">
-                                        <input type="button" class="circle" style="font-size:20px" value="+">
-                                    </a>
-                                </div>
-                                <div class="line"></div>
-                            </div>
-                        
-                            <div class="column">
-                                <div class="floor" id="2">
-                                    <a href="/classify" style="align-self:center">
-                                        <input type="button" class="circle" style="font-size:20px" value="+">
-                                    </a>
-                                </div>
-                                <div class="line"></div>
-                            </div>
-                        
-                            <div class="column">
-                                <div class="floor" id="3">
-                                    <a href="/classify" style="align-self:center">
-                                        <input type="button" class="circle" style="font-size:20px" value="+">
-                                    </a>
-                                </div>
-                                <div class="line"></div>
-                            </div>
-                        
-                            <div class="column">
-                                <div class="floor" id="4">
-                                    <a href="/classify" style="align-self:center">
-                                        <input type="button" class="circle" style="font-size:20px" value="+">
-                                    </a>
-                                </div>
-                                <div class="line"></div>
-                            </div>
-                        
-                        <div id="popup" style="display: none;"></div>
-                        </div>
-                        <nav id="main_footer">
-                                <input type="button" id="back"/>
-                                <input type="button" id="reload"/>
-                                <a href="#" class="openMask">검은 막 띄우기</a>
-                            </nav>
-        </div>
-        
         <script>
-            $(document).ready(()=>{
-                function wrapWindowByMask(){
-        //화면의 높이와 너비를 구한다.
-        var maskHeight = $(document).height();  
-        var maskWidth = $(window).width();  
-		
-        //마스크의 높이와 너비를 화면 것으로 만들어 전체 화면을 채운다.
-        $('#mask').css({'width':maskWidth,'height':maskHeight});  
-		
-        //애니메이션 효과
-        $('#mask').fadeIn(1000);      
-        $('#mask').fadeTo("slow",0.8);    
-};
-$('.openMask').click(function(e){
-            e.preventDefault();
-            wrapWindowByMask();
-        });
-$('#mask').click(function () {  
-    $(this).hide();  
-    $('.window').hide();  
-});
+            $(document).ready(() => {
+                $('.service_btn').click((handler) => {
+                    var target =  handler.currentTarget.value;
+                    if(target[0] === '냉') {
+                        location.href = '/refrigerator';
+                    }
+                    else {
+                        location.href = '/recipe';
+                    }
+                });
+                $('#reload').click(() => {
+                    location.reload();
+                })
             })
-          
         </script>
     </body>
 </html>
