@@ -3,6 +3,7 @@
         <meta charset = "utf-8" />
         <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
         <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <link rel="stylesheet" type="text/css" href="/css/img.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
         <title>Classify Page</title>
     </head>
@@ -34,16 +35,13 @@
             $('.app').css('background','url()');
             var data = [],
                 inputData = function(data,name,value) {
-                    return data.concat([{name:name,value:value}]);
+                    return Array.prototype.concat.call(data,[{name:name,value:value}]);
                 };
-            $('.ingrd_thumb').click((onClick) => {
+        $('.ingrd_thumb').click((onClick) => {
                 var current = onClick.currentTarget.name,
-                    classify_id = `<%= classifyId %>`,
-                    date = new Date(),
-                    year = date.getFullYear(),
-                    month = date.getMonth().length === 1 ? '0'+date.getMonth() : date.getMonth(),
-                    day = date.getDay(),
-                    current_date = `${year}-${month}-${day}`;
+                    classify_id = `<%= classifyId %>`;
+
+                    //함수형 프로그래밍 바람
                 data = inputData(data,'name',current);
                 data = inputData(data,'classify_id',classify_id);
 
@@ -72,6 +70,27 @@
         });
         $('#user_menu').click(() => {
             location.href = '/main';
+        });
+                  /* 로그인 관련 */
+            /* 로그인 ajax */
+        $.ajax({
+            url: '/is_login',
+            type: 'get',
+            datatype: 'json',
+            success: function(flag) {
+                if(flag) {
+                    $('#login_btn').text('로그아웃');
+                }
+            }
+        });
+            /* 로그인 로그아웃 버튼 변경 */
+        $('#login_btn').click(function() {
+            if($(this).text() === '로그인') {
+                location.href = '/login';
+            }
+            else {
+                location.href = '/logout';
+            }
         });
         })
         </script>

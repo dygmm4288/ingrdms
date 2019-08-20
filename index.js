@@ -69,6 +69,69 @@ app.use(session({
 //get
 
 app.get('/',(req,res)=>{
+    //Check Init Data 
+    const cheerio = require('cheerio'),
+          fs = require('fs');
+    let recipe_table = null;
+    //Init Data
+    if(true){
+    const list = require('./public/js/linked_list'),
+          Data = require('./public/js/recipe.js')(),
+          initTable = function(table,count) {
+            if(count > 0) {
+                table.push(new list());
+                return initTable(table,count-1);
+            }
+            else {
+                return table;
+            }
+        };
+    let $ = null,
+        query = null,
+        ingrd_list = new Array(),
+        util = require('util');
+    recipe_table = new Array();
+
+    recipe_table = initTable(recipe_table,10);
+
+    $ = cheerio.load(fs.readFileSync(__dirname+'/public/recipe_data.xml','utf-8'),{xmlMode:true});
+    $('row').each(function() {
+        let recipe_id = $(this).find('RECIPE_ID').text(),
+            recipe_name = $(this).find('RECIPE_NM_KO').text(),
+            type_code = $(this).find('NATION_CODE').text(),
+            cooking_time = $(this).find('COOKING_TIME').text(),
+            level = $(this).find('LEVEL_NM').text(),
+            img_url = $(this).find('IMG_URL').text(),
+            classify_code = $(this).find('TY_CODE').text(),
+            amount = $(this).find('QNT').text();
+        recipe_table[recipe_id % 10].append(new Data.Recipe(recipe_id,recipe_name,type_code,classify_code,cooking_time,amount,level,img_url));
+    });
+    $ = cheerio.load(fs.readFileSync(__dirname+'/public/ingrd_data.xml','utf-8'),{xmlMode: true});
+    $('row').each(function(){
+        let recipe_id = $(this).find('RECIPE_ID').text(),
+            ing_name = $(this).find('IRDNT_NM').text(),
+            ing_amount = $(this).find('IRDNT_CPCTY').text(),
+            ing_ty_code = $(this).find('IRDNT_TY_CODE').text(),
+            cur = null;
+
+        ingrd_list.push(new Data.Ingredient(recipe_id,ing_name,ing_amount,ing_ty_code));
+        cur = recipe_table[recipe_id%10]._head;
+        while(cur.next)
+        {
+            cur = cur.next;
+            if(cur.data.recipe_id === recipe_id)
+            {
+                cur.data.count_ingrd++;
+            }
+        }
+    });
+    
+    } else {    //exist init
+
+    }
+    
+    
+    //render page
     res.render('welcome',{},(err,html) => {
         if(err) {
             console.log('err?');
@@ -121,6 +184,12 @@ app.get('/loginError/:level',(req,res)=>{
             <div class = "footer">
             </div>
         </div>
+`,` $(document).ready(() => {
+    $('#skipButton').click(()=>{
+   location.href = '/main';
+   });
+    
+})
 `);
 res.send(html);
 })
@@ -213,48 +282,6 @@ app.get('/signUp',(req,res)=>{
 });
 
 app.get('/main',(req,res)=>{
-//     var title = 'Main Page',
-//         checkResult = func.checkUser(req.session),
-//         html = template.HTML(title,`
-//     <div class="app">
-//         <div class = "topLogin">
-//         ${checkResult.say}
-//         <input type = "button"
-//         class = "stateButton"
-//         onclick = "stateclick()" 
-//         id = state 
-//         value = "${checkResult.state}">
-//         </div>
-//         <div class = "content">
-//             <input type = "button" class = "fixed"
-//              value = "냉장고 관리" onclick = "goRefri()"/>
-//             <input type = "button" class = "fixed"
-//              value = "레시피 추천" onclick = "goRecipe()"/>     
-//         </div>
-//     </div>    
-// `,`function goRefri() {
-//     location.href ='./refrigerator';
-//     };
-//     function goRecipe(){
-//         location.href = './recipe';
-//     };
-//     function stateclick() {
-//         var state = document.getElementById('state');
-//         console.log(state);
-//         if(state.value === '로그인')
-//         {
-//             console.log('location to login');
-//             location.href = '/login/';
-//         }
-//         else if(state.value === '로그아웃')
-//         {
-//             console.log('location to logout');
-//             location.href = '/logout/';
-
-//         }
-//     }`   );
-
-// res.send(html);
     res.render('main',(err,html) => {
         if(err) {
             console.log('Main Page Error Rendering Error'+err);
@@ -292,13 +319,14 @@ res.render('refrigerator',{
 app.get('/getRecipe',(req,res) => {
     //var user_id = req.query.user_id,
     var user_id = 'dygmm4288',
-        query = 'select ing_name from ingredient_u where ingUser_id = ?';
+        query = 'select ing_name, expiry_date from ingredient_u where ingUser_id = ?';
 
     const DataBase = require('./public/js/DataBase'),
           database = new DataBase();
     try {
     database.query(query,user_id).then((row)=>{
         if(row.length !== 0) {
+            console.log(row);
             res.send(row);
             }
         else {
@@ -318,7 +346,7 @@ app.get('/classify',(req,res)=>{
         `<div class="app">
            <header id = "main_header"> 
                 <aside id="user_menu"></aside>
-                <h1>분류</h1>
+                <h1>분 류</h1>
                 <button id="login_btn">로그인</button>
            </header>
            <div class = "content">
@@ -327,16 +355,36 @@ app.get('/classify',(req,res)=>{
                <input type="button" class="btn_classify" value = "과일">
                <input type="button" class="btn_classify" value = "수산물">
                <input type="button" class="btn_classify" value = "양념&소스">
-               <input type="button" class="btn_classify" value = "가공&유제품">
-               <input type="button" class="btn_classify" value = "기타">
+               <input type="button" class="btn_classify" value = "유제품">
+               <input type="button" class="btn_classify" value = "가공&기타">
            </div>
            <nav id = "main_footer">
                 <input type="button" id="back"/>
                 <input type="button" id="reload"/>
            </nav>
         </div>`,
-        `
-           $(':button').click((onClick)=>{
+        ` /* 로그인 관련 */
+        /* 로그인 ajax */
+        $.ajax({
+            url: '/is_login',
+            type: 'get',
+            datatype: 'json',
+            success: function(flag) {
+                if(flag) {
+                    $('#login_btn').text('로그아웃');
+                }
+            }
+        });
+        /* 로그인 로그아웃 버튼 변경 */
+        $('#login_btn').click(function() {
+            if($(this).text() === '로그인') {
+                location.href = '/login';
+            }
+            else {
+                location.href = '/logout';
+            }
+        });
+           $('input[type=button]').click((onClick)=>{
            var value = onClick.currentTarget.value;
            var adr = '/classify/'+value;
            location.href = adr;
@@ -371,129 +419,65 @@ app.get('/classify/:classifyId',(req,res)=>{
         case '양념&소스':
             param = classify.Seasoning;
             break;
-        case '가공&유제품':
-            param = classify.Product;
+        case '유제품':
+            param = classify.Dairy;
             break;
-        case '기타':
-            param = classify.Etc;
+        case '가공&기타':
+            param = classify.Product;
             break;
             default:
                 console.error('switch Error');
             break;
-    }
+    } 
     res.render('classify',{
         value: param,
         classifyId: req.params.classifyId,   
     },(err,html)=>{if(err)throw err; res.end(html)});
 });
-app.get('/inif/:classiId/:inifId',(req,res)=>{
-    var title = 'In Information Page',
-        html = template.HTML(title,
-`
-<div class="all">
-        <form>
-    <div class = "content">
-        <div class = "column">
-            <div class = "columnItem left">분 류</div>
-            <div class = "columnItem right" id = "classify">${req.params.classiId}</div>
-        </div>
-        <div class = "column">
-            <div class = "columnItem left">이 름</div>
-            <div class = "columnItem right">
-                <input type = "text" required value = "${req.params.inifId}" id = "name" name = "name">
-            </div>
-        </div>
-        <div class = "column">
-            <div class = "columnItem left">보관방법</div>
-            <div class = "columnItem right_btn">
-                <input type = "button" id = "frozen" class = "list" value = "냉동 보관" name = "frozen">
-                <input type = "button" id = "fresh" class = "list" value = "냉장 보관">
-            </div>
-        </div>
-        <div class = "column">
-            <div class = "columnItem left">상태</div>
-            <div class = "columnItem right">
-                    <input type="text" id="state"  name="state" value = "좋음">
-            </div>
-        </div>
-    </div>
-        <input type = "submit"  value = "입력">
-        <input type = "button" value = "취소" id = "cancle_btn">
-    </form>
-</div>
-`,`
-var frozen = $('#frozen'),
-    fresh = $('#fresh');
-
-$(document).ready(()=>{
-    
-    var flag = 1,
-        data = null,
-        inputData = function(data,name,value) {
-            return data.concat([{name: name, value: value}]);
-        };
-
-    $("#cancle_btn").click(()=>{
-        window.history.back();
-    })
-    frozen.click(()=>{
-        flag = 1;
-        frozen.css('background-color',"lightblue");
-        fresh.css('background-color','');
-    })
-    fresh.click(()=>{
-        flag = -1;
-        frozen.css('background-color','');
-        fresh.css('background-color','lightblue');
-    });
-    $("form").submit((e) => {
-        e.preventDefault();
-       data = $("form").serializeArray();
-       flag === 1 ? data = inputData(data,"keep",frozen.val()) : data = inputData(data,"keep",fresh.val());
-       data = inputData(data,"classify",$("#classify").text());
-
-       $.ajax({
-        url: "/processing",
-        data: data,
-        type: "get",
-        async: false
-        }).done((data)=> {
-        if(data === "Success") {
-            alert("등록이 완료되었습니다.");
-            location.href = '/refrigerator/';
-        }
-        else if(data === "Fail") {
-            alert("이미 등록된 재료입니다.");
-            location.href = '/classify/';
-        }
-    });
-    })
-     
-})
-`);
-      res.send(html);
-})
 app.get('/processing',async (req,res)=>{
-    var ingrdName = req.query.name,
+    var ingrdName = req.query.name || null,
    //var userid = req.session.userid;
-        userid = "dygmm4288";
+        userid = "dygmm4288",
+        resist_date = new Date();
+        classify_id = req.query.classify_id;
+    
     const DataBase = require('./public/js/DataBase'),
-          database = new DataBase(),
-          router = this;
-
+          database = new DataBase();
+    /* 분류 별 날짜 기준 */
+    switch(classify_id) {
+        case '육류':
+            resist_date.setDate(resist_date.getDate()+3);
+            break;
+        case '채소':
+            resist_date.setDate(resist_date.getDate()+5);
+            break;
+        case '과일':
+            resist_date.setDate(resist_date.getDate()+7);
+            break;
+        case '수산물':
+            resist_date.setDate(resist_date.getDate()+6);
+            break;
+        case '유제품':
+            resist_date.setDate(resist_date.getDate()+10);
+            break;
+        default :
+            resist_date.setFullYear(resist_date.getFullYear()+1);
+            break;
+    }
    //사용자 정보가 없는 경우
-    if(userid === undefined) { 
-       console.log("Not exsists Users");
+    if(userid === undefined || ingrdName === null) { 
+       console.log("Not exsists Users Or ingrdName is null");
+       res.send("Fail");
     }
       //사용자 정보가 있는 경우
     else {
         var query = 'select ing_name from ingredient_u where ingUser_id = ? and ing_name = ?';
         try{
-            await database.query(query,[userid,ingrdName]).then((row) =>{
+            database.query(query,[userid,ingrdName]).then((row) =>{
                 return new Promise(async (response,reject) => {
                     if(row.length === 0) {
-                        query = 'insert into ingredient_u values(?,?)';
-                        await database.query(query,[userid,ingrdName]);
+                        query = 'insert into ingredient_u values(?,?,?,null)';
+                        await database.query(query,[userid,ingrdName,resist_date]);
                         response();
                     }
                     else {
@@ -515,321 +499,12 @@ app.get('/processing',async (req,res)=>{
 app.get('/recipe',(req,res)=>{
     res.render('recipe',{},(err,html)=>{if(err)throw err;res.end(html);});
 });
-app.get('/recommand',(req,res)=>{
-
-const cheerio = require('cheerio'),
-      fs = require('fs'),
-      data = require('./public/js/recipe.js')(),
-      list = require('./public/js/linked_list'),
-      ingrd_list = [],
-      userData = require('./public/js/userData')(),
-      DataBase = require('./public/js/DataBase'),
-      database = new DataBase(),
-      arr_userData = [],
-      first_recommend = [],
-      setTable = function(Table,count) {
-          if(count > 0) {
-              Table.push(new list());
-              return setTable(Table,count-1);
-          }
-          else {
-              return Table;
-          }
-      },
-      Recommend = (function () {
-        return {
-            first: function (cur,iv,v,is_prime) {
-                do{
-                    cur = cur.next;
-                if(cur.data.recipe_id === iv.ingRecipe_id)
-                {
-                    cur.data.count += 1;
-                    //확인한 레시피인가 아닌가?
-                    if(first_recommend.indexOf(cur.data) === -1) first_recommend.push(cur.data);
-                    //상태에 따른 가중치 부여
-                    var tmp_weight = 0;
-                    if(v.state === '좋음'){
-                        tmp_weight += 5;
-                    }
-                    else if(v.state === '보통'){   
-                        tmp_weight += 8;
-                    }
-                    else {
-                        tmp_weight += 10;
-                    }
-                    cur.data.weight += (tmp_weight/10)*0.1;
-                    //재료의 수량 가중치 부여
-                    if(is_prime){
-                        tmp_weight = 0;
-                        cur.data.prime_ingrd++;
-                        if(v.amount >= '500g'){
-                            tmp_weight += 10;
-                        }
-                        else if(v.amount >= '250g'){
-                            tmp_weight += 8;
-                        }
-                        else {tmp_weight += 5;}
-                    cur.data.weight += (tmp_weight/10)*0.1;
-                    }
-                    else if(!is_prime)
-                    {
-                        cur.data.sub_ingrd += 1;
-                        tmp_weight = 0;
-                        if(v.amount >= '250g') tmp_weight = 10;
-                        else if(v.amount >= '100g') tmp_weight = 8;
-                        else tmp_weight = 5;
-                    cur.data.weight += (tmp_weight/10)*0.1;
-                    }
-                    //주재료로 구성된 메뉴로 레시피를 만들수 있는지에 따른 가중치 부여
-                    
-            
-                }
-            }
-            while(cur.next);
-            },
-            second: function(){
-
-            }
-        };
-    }());
-let recipeTable = new Array(),
-    $ = null,
-    query = null;
-
-    recipeTable = setTable(recipeTable,10);
-
-
-    $ = cheerio.load(fs.readFileSync(__dirname+'/public/recipe_data.xml','utf-8'),{xmlMode: true});
-
-$('row').each(function(){
-    let r_id = $(this).find('RECIPE_ID').text();
-    let r_name = $(this).find('RECIPE_NM_KO').text();
-    let t_code = $(this).find('NATION_CODE').text();
-    let tp=$(this).find('NATION_CODE').text();
-    let class_code=$(this).find('TY_CODE').text();
-    let clas=$(this).find('TY_NM').text();
-    let time=$(this).find('COOKING_TIME').text();
-    let amount=$(this).find('QNT').text();
-    let level=$(this).find('LEVEL_NM').text();
-    let img = $(this).find('IMG_URL').text();
-    let tmp_recipe = new data.Recipe(r_id,r_name,t_code,tp,class_code,clas,time,amount,level,img);
-    recipeTable[r_id%10].append(tmp_recipe);
-})
-
-$ = cheerio.load(fs.readFileSync(__dirname+'/public/ingrd_data.xml','utf-8'),{xmlMode: true});
-$('row').each(function(){
-    let r_id = $(this).find('RECIPE_ID').text();
-    let ing_name = $(this).find('IRDNT_NM').text();
-    let ing_amount = $(this).find('IRDNT_CPCTY').text();
-    let ing_ty_code = $(this).find('IRDNT_TY_CODE').text();
-    let ing_ty = $(this).find('IRDNT_TY_NM').text();
-    ingrd_list.push(new data.Ingredient(r_id,ing_name,ing_amount,ing_ty_code,ing_ty));
-    var cur = recipeTable[r_id%10]._head;
-    while(cur.next)
-    {
-        cur = cur.next;
-        if(cur.data.recipe_id === r_id)
-        {
-            cur.data.count_ingrd++;
+app.get('/recommend',(req,res)=>{
+    res.render('recommend',{},(err,html) => {
+        if(err) {
+            throw err;
         }
-        
-    }
-});
-   //function Recommand()
-
-function SecondRecommend(user_id){
-    const User = (function() {
-        function User(name,data) {
-            this.name = name;
-            this.data = data;
-        };
-        return User;
-    })(),
-          Data = (function() {
-        function Data(){
-            this.data = new Array();
-        };
-        //Error 있음
-        Data.prototype.setData = function(recipe_id,count){
-            //레시피 번호가 배열이라면?
-            if(Array.isArray(recipe_id)){
-                if(Array.isArray(count))
-                {
-                 recipe_id.length == count.length ?
-                 recipe_id.forEach((value,index)=>{
-                     this.data.push(this.info(value,count[index]));
-                 }):
-                 recipe_id.forEach((value,index)=>{
-                     index  > count.length-1 ?
-                     this.data.push(this.info(value,count[count.length-1])):
-                     this.data.push(this.info(value,count[index]));
-                 })
-                }//선택횟수가 배열이 아니라면>
-                else{
-                    recipe_id.forEach((value)=>{
-                        this.data.push(this.info(value,count));
-                    })
-                }
-            }
-            //레시피 번호가 배열이 아니라면?
-            else{
-                if(Array.isArray(count)){
-                    var e = new Error('Recipe_id is value and Count is array Error'); 
-                    e.name = 'NoMathingData';
-                    throw e;
-                }
-                else {
-                    this.data.push(this.info(recipe_id,count));
-                }
-            }
-            return this.data;
-        };
-        Data.prototype.info = function(recipe_id,count)
-        {
-            const obj = {
-               recipe_id: recipe_id,
-               count: count
-            };
-            return obj;
-        };
-        return Data;
-    })(),
-         ubCF = (function(){
-        function ubCF() {}
-        /*
-            @{param} {Array Object}
-            @Array object {name, data(object)}
-            @data(object){recipe_id, count} 
-            @{return} {Number} recipe_id
-         */
-        ubCF.prototype.excute = function(arrObj,User){
-            /* 
-            @params {Array Obj, User {String}}
-            @return {recipe_id Integer}
-             */
-            var i = 0,
-                Graph = require('./public/js/Graph.js'),
-                graph = new Graph(),
-                arr_length = arrObj.length,
-                selected_user = null,
-                user = null,
-                tempResult = null;
-            const _ = require('lodash');
-
-           for(i in arrObj){
-               graph.insertVertex(arrObj[i].name,arrObj[i]);
-               if(arrObj[i].name === User) {
-                    user = arrObj[i];
-               }
-           };
-           //코사인 값 계산
-           for(i in arrObj){
-                for(var j = parseInt(i)+1;j<arr_length;j+=1){
-                    /*
-                    @param {object} 
-                    @return {int} 코사인 분자의 값
-                    */
-                    var user1 = arrObj[i].data, 
-                        user2 = arrObj[j].data,
-                        user1Recipe = null,
-                        user2Recipe = null,
-                        numerator = 0,//분자값
-                        denominator = 0,//분모값
-                        user1_pow_total = 0,
-                        user2_pow_total = 0;
-            
-                    for(var x in user1){
-                        user1Recipe = user1[x].recipe_id;
-                        user1_pow_total += Math.pow(user1[x].count,2);
-                        for(var y in user2){
-                        user2_pow_total += Math.pow(user2[y].count,2);
-                            user2Recipe = user2[y].recipe_id;
-                            if(user1Recipe === user2Recipe){
-                                numerator += (user1[x].count) * (user2[y].count);
-                                break;
-                            }
-                        }
-                    }
-                    
-                    denominator = Math.sqrt(user1_pow_total) * Math.sqrt(user2_pow_total);
-                    result = numerator / denominator;
-                    //무방향 그래프 값 삽입
-                    graph.insertTwoWayArc(graph,result,arrObj[i].name,arrObj[j].name);
-                }
-           };
-           selected_user = graph.findSimilar(User);
-           tempResult = _.differenceBy(selected_user.data,user.data,'recipe_id');
-           tempResult.sort(function(o) {return o.count;});
-           tempResult.length < 5 ? null : _.slice(tempResult,0,5);
-           return tempResult;
-        };
-        
-        return ubCF;
-    })(),
-    /*Testing */
-        arr_user = [];
-    arr_user.push(new User('이진호',new Data().setData([1,3,5,6],[3,1])));
-    arr_user.push(new User('이가온',new Data().setData([1,2,3],[2,4,1])));
-    arr_user.push(new User('송훈섭',new Data().setData([1,2,4,5],[2,1,2,1])));
-    //데이터 접근 arr_user[0].data[0].recipe_id// arr_user[0].data[0].count;
-var result = null;
-    result = (new ubCF().excute(arr_user,'이진호'));
-    console.log(result);
-
-    
-
-    
-}
-
-//User Data
-var userid = 'dygmm4288';
-
-query = 'select * from ingredient_u where ingUser_id = ?';
-database.query(query,userid).then((row) => {
-    if(row.length === 0) {
-        console.log("selct * from ingredient_u where ingUser_id 결과없음");
-    }
-    else {
-
-        row.forEach((value) => {
-            arr_userData.push(new userData.UserIngrd(userid,value.ing_name,'좋음','500g'));
-        });
-        return new Promise((response,reject) => {
-            response(arr_userData);
-        }).then((arr_userData => {
-            arr_userData.forEach((user_value) => {
-                ingrd_list.forEach((ingrd_value) => {
-                    if(ingrd_value.ingredient_name === user_value.ingrd_name && ingrd_value.ing_typeCode === '3060001')
-            {
-                var cur = recipeTable[ingrd_value.ingRecipe_id % 10]._head;
-                Recommend.first(cur,ingrd_value,user_value,true);
-                
-            }
-            else if (ingrd_value.ingrdient_name === user_value.ingrd_name){
-                var cur = recipeTable[ingrd_value.ingRecipe_id % 10]._head;
-                Recommend.first(cur,ingrd_value,user_value,false);
-            }
-                });
-            });
-            for(i in first_recommend) {
-                var tmp = 0,
-                    prime = 0,
-                    sub = 0,
-                    that = first_recommend[i];
-                prime = 14*(that.prime_ingrd/that.count_ingrd);
-                sub = 6*(that.sub_ingrd/that.count_ingrd);
-                tmp = prime + sub;
-                that.weight += (tmp/20)*0.2;
-            }
-            return new Promise((response,reject)=>{
-                response(first_recommend);
-            }).then((first_recommend) => {
-                res.send(first_recommend);
-            });
-        }))
-    };
-}).catch((err) => {
-      throw err;
+        res.end(html);
     });
 });
 app.get('/setRecipe',(req,res)=>{
@@ -869,73 +544,512 @@ app.get('/setRecipe',(req,res)=>{
     })
 })
 app.get('/test',(req,res)=>{
-    res.render('test',{
-    },(err,html)=>{
-        if(err) {
-            console.log('ERR?');
-            throw err;
-            
-         }
-          res.end(html)
-    });
-    
-})
-app.get('/info',(req,res)=>{
-    var title = 'In Information Page';
-    var html = template.HTML(title,
-        `   <div class="all">
-        <div class="box">
-            <div class="classify">분 류</div>
-            <div class="solidbox">등 심</div>
-        </div>
-        <div class="box">
-            <div class="classify">이 름</div>
-            <div class="solidbox"><input type="text"></input></div>
-        </div>
-        <div class="box">
-            <div class="classify">보관방법</div>
-            <div class="solidbox"><div class="list">냉장보관</div>
-            <div class="list">냉동보관</div>
-            
-        </div>
-    </div>
-        <div class="box">
-            <div class="classify">유통기한</div>
-            <div class="solidbox"><p><input type="text" id="datepicker_add_day" placeholder="3일후 날짜"></p>
-</div>            
-        </div>
-</div>
-<div class="inputbox">입 력</div>
-      <div class="inputbox">취 소</div>
+    //Check Init Data 
+    const cheerio = require('cheerio'),
+          fs = require('fs');
 
-`,` $(function() {
-    $( "#testDatepicker" ).datepicker({
+          //Init Data
+    if(true){
+    const list = require('./public/js/linked_list'),
+          Data = require('./public/js/recipe.js')(),
+          initTable = function(table,count) {
+            if(count > 0) {
+                table.push(new list());
+                return initTable(table,count-1);
+            }
+            else {
+                return table;
+            }
+        },json = async function(wr,filename,result) {
+            if(wr === 'r') {
+                var output = fs.readFileSync(__dirname+filename,'utf-8',(err,data) => {
+                    if(err) {
+                        throw err;
+                    }
+                    console.log('Read Success');
+                });
+                output = JSON.parse(output);
+                return output;
+               
+            } 
+            else {
+                result = JSON.stringify(result);
+                return fs.writeFile(__dirname+filename,result,'utf-8',(err,data) => {
+                    if(err) {
+                        throw err;
+                    }
+                    console.log('Write Success');
+                });
+            }
+        };
+    let $ = null,
+        query = null,
+        ingrd_list = new Array(),
+        recipe_table = new Array();
+
+        recipe_table = initTable(recipe_table,10);
+
+    $ = cheerio.load(fs.readFileSync(__dirname+'/public/recipe_data.xml','utf-8'),{xmlMode:true});
+
+    $('row').each(function() {
+        let recipe_id = $(this).find('RECIPE_ID').text(),
+            recipe_name = $(this).find('RECIPE_NM_KO').text(),
+            type_code = $(this).find('NATION_CODE').text(),
+            cooking_time = $(this).find('COOKING_TIME').text(),
+            level = $(this).find('LEVEL_NM').text(),
+            img_url = $(this).find('IMG_URL').text(),
+            classify_code = $(this).find('TY_CODE').text(),
+            amount = $(this).find('QNT').text();
+        recipe_table[recipe_id % 10].append(new Data.Recipe(recipe_id,recipe_name,type_code,classify_code,cooking_time,amount,level,img_url));
+    });
+    $ = cheerio.load(fs.readFileSync(__dirname+'/public/ingrd_data.xml','utf-8'),{xmlMode: true});
+    $('row').each(function(){
+        let recipe_id = $(this).find('RECIPE_ID').text(),
+            ing_name = $(this).find('IRDNT_NM').text(),
+            ing_amount = $(this).find('IRDNT_CPCTY').text(),
+            ing_ty_code = $(this).find('IRDNT_TY_CODE').text(),
+            cur = null;
+
+        ingrd_list.push(new Data.Ingredient(recipe_id,ing_name,ing_amount,ing_ty_code));
+        cur = recipe_table[recipe_id%10]._head;
+        while(cur.next)
+        {
+            cur = cur.next;
+            if(cur.data.recipe_id === recipe_id)
+            {
+                cur.data.count_ingrd++;
+            }
+        }
+    });
+    var output_data = json('r','/public/ingrd_data.json');
+    console.log(output_data);
+}
+});
+app.get('/recommend/:way',(req,res) => {
+var way = req.params.way;
+
+res.render('recipe',{way: way},(err,html) => {
+    if(err) {
+        console.log(err);
+        throw err;
+    }
+    res.end(html);
     });
 });
-`);
-    res.send(html);
+app.get('/process_recommend',(req,res) => {
+    const cheerio = require('cheerio'),
+          fs = require('fs'),
+          ingrd_list = [],
+          list = require('./public/js/linked_list'),
+          Data = require('./public/js/recipe.js')(),
+          initTable = function(table,count) {
+              if(count > 0) {
+                  table.push(new list());
+                  return initTable(table,count-1);
+              }
+              else {
+                  return table;
+              }
+          };
+    let recipe_table = [];
+
+        $ = null,
+        query = null;
+        //init recipe_table
+    recipe_table = initTable(recipe_table,10);
+    $ = cheerio.load(fs.readFileSync(__dirname+'/public/recipe_data.xml','utf-8'),{xmlMode:true});
+    $('row').each(function() {
+        let recipe_id = $(this).find('RECIPE_ID').text(),
+            recipe_name = $(this).find('RECIPE_NM_KO').text(),
+            type_code = $(this).find('NATION_CODE').text(),
+            cooking_time = $(this).find('COOKING_TIME').text(),
+            level = $(this).find('LEVEL_NM').text(),
+            img_url = $(this).find('IMG_URL').text(),
+            classify_code = $(this).find('TY_CODE').text(),
+            amount = $(this).find('QNT').text();
+        recipe_table[recipe_id % 10].append(new Data.Recipe(recipe_id,recipe_name,type_code,classify_code,cooking_time,amount,level,img_url));
+    });
+    $ = cheerio.load(fs.readFileSync(__dirname+'/public/ingrd_data.xml','utf-8'),{xmlMode: true});
+$('row').each(function(){
+    let r_id = $(this).find('RECIPE_ID').text();
+    let ing_name = $(this).find('IRDNT_NM').text();
+    let ing_amount = $(this).find('IRDNT_CPCTY').text();
+    let ing_ty_code = $(this).find('IRDNT_TY_CODE').text();
+    let ing_ty = $(this).find('IRDNT_TY_NM').text();
+    ingrd_list.push(new Data.Ingredient(r_id,ing_name,ing_amount,ing_ty_code,ing_ty));
+    var cur = recipe_table[r_id%10]._head;
+    while(cur.next)
+    {
+        cur = cur.next;
+        if(cur.data.recipe_id === r_id)
+        {
+            cur.data.count_ingrd++;
+        }
+        
+    }
+});
+    if(req.query.way === 'content'){
+        
+    const DataBase = require('./public/js/DataBase'),
+          database = new DataBase(),
+          userData = require('./public/js/userData')(),
+          arr_userData = [],
+          result_recommend = [];
+
+    var content = function(cur,ingrd_v,v,is_prime) { 
+        while(cur.next) {
+            cur = cur.next;
+            var tmp_weight = 0;
+            if(cur.data.recipe_id === ingrd_v.ingRecipe_id) {
+                cur.data.count += 1;
+                if(result_recommend.indexOf(cur.data) === -1) {
+                    result_recommend.push(cur.data);
+                }
+                switch(v.state) {
+                    case '좋음':
+                        tmp_weight += 5;
+                        break;
+                    case '보통':
+                        tmp_weight += 8;
+                        break;
+                    default:
+                        tmp_weight += 10;
+                        break;
+                }
+                cur.data.weight += (tmp_weight/10)*0.1;
+
+                if(is_prime) {
+                    tmp_weight = 0;
+                    cur.data.prime_ingrd++;
+                    if(v.amount > 500) {
+                        tmp_weight += 10;
+                    } else if(v.amount > 250) {
+                        tmp_weight += 8;
+                    } else {
+                        tmp_weight += 5;
+                    }
+                    cur.data.weight += (tmp_weight/10)*0.1;
+                } else {
+                    cur.data.sub_ingrd += 1;
+                    tmp_weight = 0;
+                    if(v.amount > 250) {
+                        tmp_weight += 10;
+                    } else if(v.amount > 100) {
+                        tmp_weight += 8;
+                    } else {
+                        tmp_weight = 5;
+                    }
+                    cur.data.weight += (tmp_weight/10) * 0.1;
+                }
+            }
+        }
+    };
+var user_id = 'dygmm4288';
+    query = 'select * from ingredient_u where ingUser_id = ?';
+    database.query(query,user_id).then(row => {
+        if(row.length === 0) {
+            console.log('not exsist');
+            return null;
+        } 
+        else {
+
+            row.forEach(value => {
+                arr_userData.push(new userData.UserIngrd(user_id,value,'좋음',500));
+            });
+
+            return new Promise((respone,reject) => {
+            var name_u = null,
+                name_i = null;
+            arr_userData.forEach(user_value => {
+            name_u = user_value.ingrd_name.ing_name;
+            ingrd_list.forEach((ingrd_value,index) => {
+                name_i = ingrd_value.ingredient_name;
+                if(name_u === name_i) {
+                    var cur = recipe_table[ingrd_value.ingRecipe_id % 10]._head,
+                        flag = ingrd_value.ing_ty_code == '3060001' ? true : false;
+                    content(cur,ingrd_value,user_value,flag); 
+                    } 
+                });
+             });
+             respone();
+            }).then(() => {
+                res.send(result_recommend);
+            }).catch((err) => {
+                console.log(err);
+            })
+        }
+    }).catch(err => {
+        if(err) {
+            console.log('query error');
+            throw err;
+        }
+    })
+    } else {
+        console.log('ubcf Start');
+        const User = (function() {
+            function User(name,data) {
+                this.name = name;
+                this.data = data;
+            };
+            return User;
+        })(),
+              Data = (function() {
+            function Data(){
+                this.data = new Array();
+            };
+            //Error 있음
+            Data.prototype.setData = function(recipe_id,count){
+                //레시피 번호가 배열이라면?
+                if(Array.isArray(recipe_id)){
+                    if(Array.isArray(count))
+                    {
+                     recipe_id.length == count.length ?
+                     recipe_id.forEach((value,index)=>{
+                         this.data.push(this.info(value,count[index]));
+                     }):
+                     recipe_id.forEach((value,index)=>{
+                         index  > count.length-1 ?
+                         this.data.push(this.info(value,count[count.length-1])):
+                         this.data.push(this.info(value,count[index]));
+                     })
+                    }//선택횟수가 배열이 아니라면>
+                    else{
+                        recipe_id.forEach((value)=>{
+                            this.data.push(this.info(value,count));
+                        })
+                    }
+                }
+                //레시피 번호가 배열이 아니라면?
+                else{
+                    if(Array.isArray(count)){
+                        var e = new Error('Recipe_id is value and Count is array Error'); 
+                        e.name = 'NoMathingData';
+                        throw e;
+                    }
+                    else {
+                        this.data.push(this.info(recipe_id,count));
+                    }
+                }
+                return this.data;
+            };
+            Data.prototype.info = function(recipe_id,count)
+            {
+                const obj = {
+                   recipe_id: recipe_id,
+                   count: count
+                };
+                return obj;
+            };
+            return Data;
+        })(),
+             ubCF = (function(){
+            function ubCF() {}
+            /*
+                @{param} {Array Object}
+                @Array object {name, data(object)}
+                @data(object){recipe_id, count} 
+                @{return} {Number} recipe_id
+             */
+            ubCF.prototype.excute = function(arrObj,User){
+                /* 
+                @params {Array Obj, User {String}}
+                @return {recipe_id Integer}
+                 */
+                var i = 0,
+                    Graph = require('./public/js/Graph.js'),
+                    graph = new Graph(),
+                    arr_length = arrObj.length,
+                    selected_user = null,
+                    user = null,
+                    tempResult = null;
+                const _ = require('lodash');
+      
+               for(i in arrObj){
+                   graph.insertVertex(arrObj[i].name,arrObj[i]);
+                   if(arrObj[i].name === User) {
+                        user = arrObj[i];
+                   }
+               };
+               //코사인 값 계산
+               for(i in arrObj){
+                    for(var j = parseInt(i)+1;j<arr_length;j+=1){
+                        /*
+                        @param {object} 
+                        @return {int} 코사인 분자의 값
+                        */
+                        var user1 = arrObj[i].data, 
+                            user2 = arrObj[j].data,
+                            user1Recipe = null,
+                            user2Recipe = null,
+                            numerator = 0,//분자값
+                            denominator = 0,//분모값
+                            user1_pow_total = 0,
+                            user2_pow_total = 0;
+                
+                        for(var x in user1){
+                            user1Recipe = user1[x].recipe_id;
+                            user1_pow_total += Math.pow(user1[x].count,2);
+                            for(var y in user2){
+                            user2_pow_total += Math.pow(user2[y].count,2);
+                                user2Recipe = user2[y].recipe_id;
+                                if(user1Recipe === user2Recipe){
+                                    numerator += (user1[x].count) * (user2[y].count);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        denominator = Math.sqrt(user1_pow_total) * Math.sqrt(user2_pow_total);
+                        result = numerator / denominator;
+                        //무방향 그래프 값 삽입
+                        graph.insertTwoWayArc(graph,result,arrObj[i].name,arrObj[j].name);
+                    }
+               };
+               selected_user = graph.findSimilar(User);
+               tempResult = _.differenceBy(selected_user.data,user.data,'recipe_id');
+               tempResult.sort(function(o) {return o.count;});
+               tempResult.length < 5 ? null : _.slice(tempResult,0,5);
+               return tempResult;
+            };
+            
+            return ubCF;
+        })(),
+        /*Testing */
+            arr_user = [];
+        arr_user.push(new User('이진호',new Data().setData([1,3,5,6],[3,1])));
+        arr_user.push(new User('이가온',new Data().setData([1,2,3],[2,4,1])));
+        arr_user.push(new User('송훈섭',new Data().setData([1,2,4,5],[2,1,2,1])));
+        //데이터 접근 arr_user[0].data[0].recipe_id// arr_user[0].data[0].count;
+      var result = null,
+          to_send_arr = [];
+        result = (new ubCF().excute(arr_user,'이진호'));
+        
+        result.forEach(value => {
+            /* recipe_id : int, count: string? */
+            var cur = recipe_table[value.recipe_id%10]._head;
+                
+            while(cur.next) {
+                cur = cur.next;
+                var recipe_id = cur.data.recipe_id
+                
+                if(recipe_id === value.recipe_id.toString()) {
+                    to_send_arr.push(cur.data);
+                }
+            }
+        });
+        res.send(to_send_arr);
+    }
+    
 });
 //listen
 app.listen(3000,function(){
     console.log('Connected 3000');
     
 });
+app.get('/db_query',(req, res) => {
+    var text = req.query.text,
+        query = null,
+        date = req.query.date,
+        id = req.query.user_id || 'dygmm4288',
+        ing_name = req.query.name,
+        flag = {response: true};
 
+
+    const DataBase = require('./public/js/DataBase'),
+          database = new DataBase();
+
+    if(text === '확인') {
+        query = 'update ingredient_u set expiry_date = ? where ing_name = ? and ingUser_id = ?';
+        database.query(query,[date,ing_name,id]).then((row) => {
+            console.log('updating is completed');
+            flag.response = true;
+            res.status(200).send(flag);
+        })
+        .catch((err) => {
+            console.log('확인 Error');
+            flag.respones = false;
+            res.status(400).send(flag);
+            throw err;
+        })
+    } else if(text === '삭제') {
+        query = 'select * from ingredient_u where ingUser_id = ? and ing_name = ?';
+        database.query(query,[id,ing_name]).then((row) => {
+            console.log('selection is completed');
+            return new Promise((resolve,reject) => {
+                if(row.length === 0) {
+                    reject();
+                } else {
+                    query = 'delete from ingredient_u where ingUser_id = ? and ing_name = ?';
+                    database.query(query,[id,ing_name]).then((row) => {
+                        console.log('deleting is completed');
+                        resolve();
+                    }).catch((err) => {
+                        reject();
+                        console.log('삭제 오류');
+                        throw err;
+                    });
+                }
+            }).then(() => {
+                flag.response = true;
+                res.status(200).send(flag);
+            }).catch(() => {
+                flag.response = false;
+                res.status(204).send(flag);
+            });
+        }).catch((err) => {
+            console.log('삭제 Error');
+            throw err;
+        });
+    }
+});
 app.post('/form_receiver',async (req,res) => { 
     const uid = req.body.uid,
           upw = req.body.upwd,
         DataBase = require('./public/js/DataBase'),
         database = new DataBase(),
         sess = req.session;
-    let result = null;
-    result = await database.login('select * from user where user_id = ?',[uid,upw]);
-    if(typeof result === 'object') {
-        func.setSess(sess,uid,result.user_name);
-        console.log('login success');
+
+    let err_level = null;
+    return new Promise((resolve,reject) => {
+        database.query('select * from user where user_id = ?',uid).then((row) => {
+            database.close().then(() => {
+                console.log('Closing Connection');
+            }).catch((err) => {
+                console.log(`'Closing Error : ${err.code}`);
+            });
+            //사용자 아이디 정보가 없음
+            if(row.length === 0) {
+                console.log('사용자 아이디 정보 없음');
+                err_level = 1;
+                reject(err_level);
+            }//사용자 아이디 정보가 같음.
+            else if(row[0].user_password === upw) {
+                resolve();
+            }//사용자 아이디는 있으나 비밀번호가 같지 않음.
+            else {
+                err_level = 2;
+                reject(err_level);
+            }
+        }).catch(err => {
+            console.log(err);
+            throw err;
+        });    
+    }).then(() => {
+        sess.user_id = uid;
+        console.log(sess);
         res.redirect('/main');
+    })
+    .catch((err_level) => {
+        res.redirect(`/loginError/${err_level}`);
+    });
+});
+app.get('/is_login',(req,res) => {
+    const sess = req.session;
+    console.log(sess);
+    if(!sess.user_id) {
+        res.send(false);
     }
     else {
-        console.log('login fail');
-        res.redirect(`loginError/${result}`);
+        res.send(true);
     }
-});
+})

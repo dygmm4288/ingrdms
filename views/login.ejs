@@ -14,10 +14,10 @@
                 <form action= "/form_receiver" method ="POST">
                     <input type = "text"  size = "25" name ="uid" placeholder = "Enter User ID" required autofocus />
                     <input type = "password" size = "25" name = "upwd" placeholder = "Enter User PassWord" required/>
-                    <div>
-                        <input type = "submit" class = "submitButton" id = "loginButton" value = "로그인"/>
-                        <input type = "button" class = "submitButton" id = "skipButton" value = "건너뛰기"/>
-                    </div>
+                <div>
+                    <input type = "submit" class = "submitButton" id = "loginButton" value = "로그인"/>
+                    <input type = "button" class = "submitButton" id = "skipButton" value = "건너뛰기"/>
+                </div>
                 </form>
                 <div style = "margin-top: 20px">
                         <a href="/findUser">아이디 비밀번호 찾기</a> / 
@@ -33,7 +33,9 @@
                 $('#skipButton').click(()=>{
                location.href = 'main';
                });
-                
+               $('.app').css('background',`url('../img/login_page.png') center no-repeat`);
+               $('.app').css('background-size','90vw 90vh');
+               
             })
            
         </script>

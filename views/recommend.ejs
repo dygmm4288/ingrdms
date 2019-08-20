@@ -4,18 +4,32 @@
         <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
         <link rel="stylesheet" type="text/css" href="/css/index.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
-        <title>Main Page</title>
+        <title>Recommend Page</title>
     </head>
     <body>
+        <div id="recommend_img">
+            <div>레시피 추천 방식을 선택하세요.</div>
+        </div>
+        
         <div class = "app">
             <header id = "main_header">
                 <aside id="user_menu"></aside>
-                <h1>MainPage</h1>
+                <h1>Recommend</h1>
                 <button id="login_btn">로그인</button>
             </header>
             <div class = "content">
-                <input type="button" class = "service_btn" value = "냉장고 관리"/>
-                <input type="button" class = "service_btn" value = "레시피 추천"/>
+               <div id="toContent">
+                   <nav name = "right">
+                       <span>내 냉장고 속 재료</span>
+                       <img src="../img/arrow.png" alt=""/>
+                   </nav>
+               </div>
+               <div id="toUBCF">
+                   <nav name = "left">
+                    <img src="../img/arrow.png" alt=""/>
+                    <span>사용자 주변 추천</span>
+                   </nav>
+               </div>
             </div>
             <nav id = "main_footer">
                 <input type="button" id="back"/>
@@ -24,23 +38,13 @@
         </div>
         <script>
             $(document).ready(() => {
-                $('.app').css('background',`url('../img/main_page.png') center no-repeat`);
-                $('.app').css('background-size','90vw 90vh');
-                $('.service_btn').click((handler) => {
-                    var target =  handler.currentTarget.value;
-                    if(target[0] === '냉') {
-                        location.href = '/refrigerator';
-                    }
-                    else {
-                        location.href = '/recommend';
-                    }
-                });
-                $('#reload').click(() => {
-                    location.reload();
-                });
-                $('#user_menu').click(() => {
-                 location.href = '/main';
-                }); 
+                /*  푸터 관련   */
+            $('#reload').click(() => {
+                location.reload();
+            });
+            $('#user_menu').click(() => {
+                location.href = '/main';
+            }); 
                 /* 로그인 관련 */
             /* 로그인 ajax */
             $.ajax({
@@ -62,8 +66,27 @@
                     location.href = '/logout';
                 }
                 
+            });
+                /* content 관련 */
+            /* FADE */
+            $('#recommend_img div').fadeTo(900,1,() => {
+                $('#toContent').fadeTo(900,1,() => {
+                    $('#toUBCF').fadeTo(900,1);
+                });
+            });
+            /* CLICK */
+            $('.content nav').click(function() {
+                var direction = $(this).attr('name');
+                if(direction === 'right') {
+                    console.log('to Content');
+                    location.href = 'recommend/content';
+                } else {
+                    console.log('to UBCF');
+                    location.href = 'recommend/ubcf';
+                }
             })
-            })
+        });
+            
         </script>
     </body>
 </html>

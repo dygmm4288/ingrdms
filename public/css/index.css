@@ -7,7 +7,7 @@ body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    background-color: #d2d2d2;
+    background-color: #ffffff;
     font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
     font-size:12px;
     height:100%;    
@@ -27,9 +27,6 @@ a {
     height: 100%;
     margin: 0 auto; 
     text-align:center;
-    background:url(../img/refrigerator.png) no-repeat center;
-    background-size: 350px 350px;
-    background-position-y:20%;
 }
 #main_header{
     max-width: 100%;
@@ -40,7 +37,11 @@ a {
     padding-right: 10px;
     text-align: center;
     line-height: 15px;
-    background-color:orange;
+    background: #aba6a6; /* Old browsers */
+    background: -moz-linear-gradient(top, #aba6a6 16%, #0e0e0e 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #aba6a6 16%,#0e0e0e 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #aba6a6 16%,#0e0e0e 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#aba6a6', endColorstr='#0e0e0e',GradientType=0 ); /* IE6-9 */
 }
 .content{
     display: flex;
@@ -56,8 +57,8 @@ a {
     height: 10%;
     flex-direction: row;
     justify-content: space-between;
-    background-color:orange;
-}
+    background-color: orange;
+ }
     /* 헤더부분 */
 #user_menu {
     flex-basis: 20%;
@@ -152,9 +153,10 @@ input[type=text]:focus,input[type=password]:focus{
     /* box-sizing:border-box; */
 
     display:flex;
-    flex: 0 0 95%;
+    flex: 1 0 80%;
     flex-direction: row;
     justify-content: flex-start;
+    overflow-x:scroll;
 }
 .line{
     max-width: 100%;
@@ -193,6 +195,7 @@ input[type=text]:focus,input[type=password]:focus{
  }
     /* input 날짜 */
  #popup > div:nth-child(2) {
+     flex-direction:column;
      justify-content: center;
      align-items: center;
  }
@@ -261,8 +264,98 @@ input[type=text]:focus,input[type=password]:focus{
     background-color: #fcff4e;
 }
 /*Landscape layout (with min-width) */
+/* 이미지 및 도형들 */
+#welcome_img {
+    position: absolute;
+    height: 55vw;
+    width: 55%;
 
+    left: 22.6%;
+    top: 10%;
 
+    border-radius: 1000px;
+    background-image:url('../img/welcome_img.jpg');
+    background-repeat: no-repeat;
+    background-size:100%;
+    background-position: center;
+    mix-blend-mode: darken;
+    opacity: 0.6;
+}
+#recommend_img {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100vw;
+    height: 100vw;
+    top: 20vw;
+    
+    border-radius: 1000px;
+    background-image:url('../img/recommend.jpg');
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-position: center;
+
+    opacity: 0.6;
+}
+  /*레시피 추천 페이지 */
+#recommend_img div {
+    position:relative;
+
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 125%;
+
+    text-align: center;
+    letter-spacing: 0.13em;
+    background-color:orange;
+    opacity:0;
+}
+#toContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+
+    flex: 0 0 15%;
+    width: 100%;
+
+    opacity: 0;
+}
+
+#toUBCF {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    flex: 0 0 15%;
+    width: 100%;
+
+    opacity:0;
+}
+#toUBCF  img {
+    transform: rotate(-180deg);
+}
+
+.content span {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: normal;
+    font-size: 30px;
+    text-align: right;
+    letter-spacing: 0.13em;
+}
+.content nav {
+    height: 35px;
+}
+.content nav > span {
+    align-self: center;
+}
+.content nav > img {
+    width: 30px;
+    height: 35px;
+}
 .event {
     border-radius:4px;
     -webkit-border-radius:4px;
@@ -336,15 +429,6 @@ position: absolute;
 bottom: 15px;
 
 }
-/* .button{
-    width: 100%;  height: 14.5%; 
-    font-size:23px;
-    color:black;
-    text-align:center;
-    background-color: rgb(255, 255, 255); 
-    position:relative; 
-    border-radius:10px;
-} */
 .ingrd_list{
     display: flex;
     flex-direction: column;
@@ -410,15 +494,6 @@ bottom: 15px;
     position: relative;
     border-radius: 6px;
 }
-
-/* .content{
-    display: flex;
-    max-width:100%;
-    height: 80%;
-    position: relative;
-    flex-direction: column;
-    justify-content: flex-end;
-} */
 .channel_list {
     display: flex;
     flex-direction:row;

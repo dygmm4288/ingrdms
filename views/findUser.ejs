@@ -4,18 +4,24 @@
         <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
         <link rel="stylesheet" type="text/css" href="/css/index.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
-        <title>Main Page</title>
+        <title>Find User Page</title>
     </head>
     <body>
         <div class = "app">
             <header id = "main_header">
-                <button id="user_menu"></button>
+                <aside id="user_menu"></aside>
                 <h1>MainPage</h1>
                 <button id="login_btn">로그인</button>
             </header>
             <div class = "content">
-                <input type="button" class = "service_btn" value = "냉장고 관리"/>
-                <input type="button" class = "service_btn" value = "레시피 추천"/>
+                <div>
+                    <div id="id">아이디 찾기</div>
+                    <div id="pwd">비밀번호 찾기</div>
+                </div>
+                <div id="form">
+
+                </div>
+
             </div>
             <nav id = "main_footer">
                 <input type="button" id="back"/>
@@ -23,20 +29,9 @@
             </nav>
         </div>
         <script>
-            $(document).ready(() => {
-                $('.service_btn').click((handler) => {
-                    var target =  handler.currentTarget.value;
-                    if(target[0] === '냉') {
-                        location.href = '/refrigerator';
-                    }
-                    else {
-                        location.href = '/recipe';
-                    }
-                });
-                $('#reload').click(() => {
-                    location.reload();
-                });
-                $('')
+            $(document).ready(function() {
+                $('.app').css('background','url()');
+                
             })
         </script>
     </body>

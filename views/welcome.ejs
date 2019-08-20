@@ -11,17 +11,22 @@
         <div class = "app">
             <header class = "#main_header">
             </header>
+            <div id="welcome_img"></div>
             <div class = "content">
-                <p style = "font-size:20;">이에이송의 <br>
-                    음식물쓰레기 줄이기 프로젝트</p>
-                <p style = "font-size:30; margin:3 auto">지금 시작합니다!</p>
                 <div class = "blink">
                 <a href = "/login"><p class = "event listening">시작하기</p></a>
                 </div>
             </div>
             <div class = "footer">
-
             </div>
         </div>
+        <script>
+            $(document).ready(() => {
+                
+                $('.app').css('background',`url('../img/welcome_page.png') center no-repeat`);
+                $('.app').css('background-size','100vw 100vh');
+                
+            })
+        </script>
     </body>
 </html>

@@ -13,9 +13,10 @@
                <div>
                    <img src="../img/shirmp.jpg" alt="" class="ingrd_thumb">
                </div>
-               <h1>재료이름</h1>
+               <h1></h1>
            </div>
            <div>
+               <strong>소비기한</strong>
                <input type="date" id="date"/>
            </div>
            <div>
@@ -56,15 +57,11 @@
         <script type = "text/javascript">
         
         $(document).ready(function() {
-            function wrapWindow() {
-            var maskHeight = $(document).height(),
-                maskWidth = $(window).width();
-            $('#mask').css({'width':maskWidth,'height':maskHeight});
-            $('#mask').fadeTo("slow",0.5);
-        }
-            $('.app').css('background','url("")');
+            var cookie = {},
+                user_id = '<%= id %>';
+
             $('#popup').hide();
-            var user_id = '<%= id %>';
+
             $.ajax({
                 url: "/getRecipe", 
                 data: { user_id: user_id},               
@@ -73,36 +70,77 @@
                 async: false,
                 success: function(data) {
                 var id = 1,
-                insert_element = null;
+                    insert_element = null,
+                    state_bar = null,
+                    date = null,
+                    date_arr = [],
+                    date_diff = null,
+                    day = 1000*60*60*24;
                 data.forEach((value)=>{
+                state_bar = 'green';
+                /*  날짜 계산*/
+                cookie[value.ing_name] = value.expiry_date;
+                date_arr = value.expiry_date.split('-');
+                date = new Date(date_arr[0],parseInt(date_arr[1])-1,date_arr[2]);
+                date_diff = parseInt((date - new Date())/day);
+                console.log(`${value.ing_name}의 남은 일수 ${date_diff}`);
+
+                if(date_diff <= 3 && date_diff >= 1) {
+                    console.log(date_diff);
+                    console.log(date_diff <= 3)
+                    console.log(date_diff >= 1);
+                    state_bar = 'yellow';
+                }
+                else if(date_diff < 1) {
+                    state_bar = 'red';
+                }
+
                 insert_element = `
                 <div class = "recipe_item">
-                <input type = "image" class = "ingrd_thumb" src = "../img/shirmp.jpg"/>
-                <div style = "flex: 0 1 10%; background-color:green"></div>
-                <strong>${value.ing_name}</strong>
+                    <input type = "image" class = "ingrd_thumb" src = "../img/shirmp.jpg"/>
+                    <div style = "flex: 0 1 10%; background-color:${state_bar}"></div>
+                    <strong>${value.ing_name}</strong>
                 </div>`
                 $(insert_element).prependTo(`#${id}`);
                 });
                 }
             });
+            /*  팝업  */
+
+            function wrapWindow() {
+            var maskHeight = $(document).height(),
+                maskWidth = $(window).width();
+            $('#mask').css({'width':maskWidth,'height':maskHeight});
+            $('#mask').fadeTo("slow",0.5);
+        }
+
             $('.floor > .recipe_item').click(function(e) {
                 e.preventDefault();
                 var width = $('.content').width(),
                     height = $('.content').height(),
-                    windowHeight = $(window).height();
+                    windowHeight = $(window).height(),
+                    ing_name = $(this).children('strong').text(),
+                    reg_date = cookie[ing_name];
+
+                $('#popup > div').eq(0).children('h1').text(ing_name);
+                $('#popup > div').eq(1).children('input').val(reg_date);
                 wrapWindow();
                 $('#popup').css(
                     {'width':width,
                     'height':windowHeight/2});
+                $('#popup')
                 $('#popup').animate({top:windowHeight}).promise().then(()=>{
                     return $('#popup').show().animate({top:windowHeight/2},500);
                 });
+
+
             });
             $('#mask').click(function() {
                 $(this).hide();
                 $('#popup').hide();
 
             });
+                /* 버튼 */
             $('#back').click(() => {
                 location.href = '/main';
             });
@@ -116,18 +154,40 @@
                 var text = $(this).children('h1').text(),
                     name = $('#popup').children('div').eq(0).children('h1').text(),
                     date = $('#date').val();
-                    sql = '';
+
                 console.log(text,name,date);
-                if(text === '확인') {
-                    sql = ''
-                }
-                else if(text === '삭제') {
-                    sql = '';
-                }
+                /*  확인 삭제 ajax */
+                $.ajax({
+                        url:'/db_query',
+                        data: {date: date, name: name, id: user_id,text: text },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(flag) {
+                            location.reload();
+                        }
+                    });
             })
-            
-
-
+                 /* 로그인 관련 */
+            /* 로그인 ajax */
+            $.ajax({
+                url: '/is_login',
+                type: 'get',
+                datatype: 'json',
+                success: function(flag) {
+                    if(flag) {
+                        $('#login_btn').text('로그아웃');
+                    }
+                }
+            });
+            /* 로그인 로그아웃 버튼 변경 */
+            $('#login_btn').click(function() {
+                if($(this).text() === '로그인') {
+                    location.href = '/login';
+                }
+                else {
+                    location.href = '/logout';
+                }
+            });
     });
         
         </script>
