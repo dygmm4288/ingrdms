@@ -833,7 +833,8 @@ var user_id = 'dygmm4288';
 
 });
 //listen
-app.listen(3000,function(){
+console.log("Port : "+ process.env.PORT);
+app.listen(process.env.PORT || 3000,function(){
     console.log('Connected 3000');
 
 });

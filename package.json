@@ -1,0 +1,30 @@
+{
+  "name": "ingrd_ms",
+  "version": "1.0.0",
+  "description": "capston design",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.19.0",
+    "cheerio": "^1.0.0-rc.2",
+    "express-session": "^1.16.1",
+    "express": "^4.16.4",
+    "ejs": "^2.6.1",
+    "jade": "^1.11.0",
+    "jquery": "^3.4.1",
+    "mysql": "^2.16.0",
+    "request": "^2.88.0",
+    "passport": "^0.4.0",
+    "xmldoc": "^1.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index"
+  },
+  "author": "jinho",
+  "license": "ISC"
+}
