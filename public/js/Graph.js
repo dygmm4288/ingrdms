@@ -180,6 +180,8 @@ var Queue = (function() {
     temp = arc;
     while(arc) {
         if(arc.nextArc) {
+            console.log("arc is ",arc);
+            console.log("nextArc is ",arc.nextArc);
             if(arc.nextArc.data > temp.data) {
                 temp = arc.nextArc;
             }
@@ -187,6 +189,57 @@ var Queue = (function() {
         arc = arc.nextArc;
     }
     return temp.destination.Vdata;
+    };
+    Graph.prototype.show = function(want) {
+        var last = this.first;
+        if(last) {
+            while(last.next !== null) {
+                want(last);
+                last = last.next;
+            }
+        } else {
+            // console.log(last.key,last.Vdata);
+            want(last);
+        }
+    };
+    Graph.prototype.getArcObject = function(predicate) {
+        var last = this.first,
+            result_array = [];
+
+        while(last.next){
+            var arc = last.arc,
+                temp_obj = {
+                    recipe_id: null,
+                    arc: []
+                },
+                max = 0;
+
+            temp_obj['recipe_id'] = last.key;
+            
+            while(arc.nextArc) {
+                max = predicate(arc,temp_obj,max);
+                arc = arc.nextArc;
+            }
+            result_array.push(temp_obj);
+            last = last.next;
+        }
+
+        return result_array;
+    }
+    Graph.prototype.find = function(fromKey,predicate) {
+        var last = this.first;
+        if(last) {
+            while(last.next !== null) {
+                if(fromKey === last.key) {
+                    predicate(last);
+                }
+                last = last.next;
+            }
+        } else {
+            if(fromKey === last.key) {
+                predicate(last);
+            }
+        }
     };
       return Graph;
 })();

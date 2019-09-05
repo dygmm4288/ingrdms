@@ -42,18 +42,11 @@
                  location.href = '/main';
                 }); 
                 /* 로그인 관련 */
-            /* 로그인 ajax */
-            $.ajax({
-                url: '/is_login',
-                type: 'get',
-                datatype: 'json',
-                success: function(flag) {
-                    if(flag) {
-                        $('#login_btn').text('로그아웃');
-                    }
-                }
-            })
-            /* 로그인 로그아웃 버튼 변경 */
+            var user_id = `<%= user_id %>`;                
+            if(user_id) {
+                $('#login_btn').text('로그아웃');
+            }            
+                /* 로그인 로그아웃 버튼 변경 */
             $('#login_btn').click(function() {
                 if($(this).text() === '로그인') {
                     location.href = '/login';

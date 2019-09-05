@@ -1,4 +1,4 @@
-const recipe = require('./recipe.js');
+
 function Node(recipe){
     this.data = recipe;
     this.next = null;
@@ -27,7 +27,17 @@ LinkedList.prototype.append = function(data){
     }
     this._length++;
 }
-
+LinkedList.prototype.appendData = function(data,predicate) {
+    /* @param data 연결리스트에 추가할 데이타 {recipe_id ingrd_name ty_code}
+            predicate 연결리스트에서 레시피 번호와 같은지 안같은지를 검사한다.
+     */
+    var cur = this._head;
+    cur = cur.next;
+    if(predicate(cur,data)) {
+        
+    }
+    
+}
 LinkedList.prototype.removeAt = function (pos)
 {
     if(pos > -1 && post < this._length)
@@ -61,5 +71,13 @@ LinkedList.prototype.display = function(){
         console.log(cur.data);
         
     }
+}
+LinkedList.prototype.find = function(data,predicate) {
+    var cur = this._head;
+    while(cur.next) {
+        cur = cur.next;
+        if(predicate(cur.data,data)) return 1; 
+    }
+    return -1;
 }
 module.exports = LinkedList;

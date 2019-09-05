@@ -30,13 +30,29 @@
                </div>
            </div>
         </div>
+        <div class="slideButton"></div>
+        <div class="slideButton"></div>
         <div class="app">    
             <header id="main_header">
                 <aside id="user_menu"></aside>
-                <h3>RefrigeratorPage</h3>
+                <h3>Refrigerator</h3>
                 <button id = "login_btn">로그인</button>
             </header>
-            <div class="content">
+            <div class ="content" id = "frozen">
+                <% for (var i = 0; i< 4;i++) { %>
+                    <div class="column">
+                        <div class="floor">
+                            <a href="/classify" style = "align-self:center">
+                                <input type="button" class="circle" style = "font-size:20px"
+                                value = "+">
+                            </a>
+                        </div>
+                        <div class="line">
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            <div class="content" id = "fresh">
             <% for(var i =0 ;i<4;i++){ %>
                 <div class="column">
                     <div class="floor" id = <%= i+1 %>>
@@ -57,11 +73,47 @@
         <script type = "text/javascript">
         
         $(document).ready(function() {
+            /* 초기화 */
             var cookie = {},
-                user_id = '<%= id %>';
-
+                user_id = '<%= user_id %>';
             $('#popup').hide();
+            $('#frozen').hide();
+                /* 슬라이드 버튼 초기화*/
+            var rightSlideButton = $('.slideButton').eq(1),
+                slide = 1;
+            function hide(jquery) {
+                var result = $(jquery);
+                return result.hide();
+                
+            }
+            function showFade(jquery,time) {
+                var result = $(jquery);
+                return result.fadeIn(time);
+            };
+            function changeText(jquery,text) {
+                var result = $(jquery);
+                return result.text(text);
+            }
+            function nextSlide() {
+                if(slide) {
+                    slide = 0;                    
+                    hide('#fresh');
+                    showFade('#frozen',1000);
+                    changeText('#main_header > h3','Freezer');
 
+                } else if(!slide) {
+                    slide = 1;
+                    hide('#frozen');
+                    showFade('#fresh',1000);
+                    changeText('#main_header > h3','Refrigerator');
+                }
+            }
+            rightSlideButton.css('transform','rotate(-180deg)');
+            rightSlideButton.css('right','0');
+                /* click Slide Button */
+            $('.slideButton').click((event) => {
+                nextSlide();
+            });
             $.ajax({
                 url: "/getRecipe", 
                 data: { user_id: user_id},               
@@ -75,20 +127,23 @@
                     date = null,
                     date_arr = [],
                     date_diff = null,
-                    day = 1000*60*60*24;
+                    day = 1000*60*60*24,
+                    today = new Date(),
+                    getDate = function(today) {
+                        return new Date(today.getFullYear(),today.getMonth(),today.getDate());
+                    };
+                    today = getDate(today);
                 data.forEach((value)=>{
                 state_bar = 'green';
                 /*  날짜 계산*/
                 cookie[value.ing_name] = value.expiry_date;
                 date_arr = value.expiry_date.split('-');
                 date = new Date(date_arr[0],parseInt(date_arr[1])-1,date_arr[2]);
-                date_diff = parseInt((date - new Date())/day);
+                date_diff = parseInt((date - today)/day);
                 console.log(`${value.ing_name}의 남은 일수 ${date_diff}`);
 
-                if(date_diff <= 3 && date_diff >= 1) {
-                    console.log(date_diff);
-                    console.log(date_diff <= 3)
-                    console.log(date_diff >= 1);
+                if(date_diff < 3 && date_diff >= 1) {
+                    
                     state_bar = 'yellow';
                 }
                 else if(date_diff < 1) {
@@ -106,17 +161,15 @@
                 }
             });
             /*  팝업  */
-
             function wrapWindow() {
             var maskHeight = $(document).height(),
                 maskWidth = $(window).width();
             $('#mask').css({'width':maskWidth,'height':maskHeight});
             $('#mask').fadeTo("slow",0.5);
         }
-
             $('.floor > .recipe_item').click(function(e) {
                 e.preventDefault();
-                var width = $('.content').width(),
+                var width = $('.app').width(),
                     height = $('.content').height(),
                     windowHeight = $(window).height(),
                     ing_name = $(this).children('strong').text(),
@@ -132,6 +185,7 @@
                 $('#popup').animate({top:windowHeight}).promise().then(()=>{
                     return $('#popup').show().animate({top:windowHeight/2},500);
                 });
+
 
 
             });
@@ -168,17 +222,9 @@
                     });
             })
                  /* 로그인 관련 */
-            /* 로그인 ajax */
-            $.ajax({
-                url: '/is_login',
-                type: 'get',
-                datatype: 'json',
-                success: function(flag) {
-                    if(flag) {
-                        $('#login_btn').text('로그아웃');
-                    }
-                }
-            });
+            if(user_id) {
+                $('#login_btn').text('로그아웃');
+            }
             /* 로그인 로그아웃 버튼 변경 */
             $('#login_btn').click(function() {
                 if($(this).text() === '로그인') {

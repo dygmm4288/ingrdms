@@ -38,25 +38,21 @@
         </div>
         <script>
             $(document).ready(() => {
-                /*  푸터 관련   */
+                /*  푸터 및 네비 관련   */
             $('#reload').click(() => {
                 location.reload();
             });
             $('#user_menu').click(() => {
                 location.href = '/main';
-            }); 
+            });
+            $('#back').click(() => {
+                location.href = '/main';
+            }) 
                 /* 로그인 관련 */
-            /* 로그인 ajax */
-            $.ajax({
-                url: '/is_login',
-                type: 'get',
-                datatype: 'json',
-                success: function(flag) {
-                    if(flag) {
-                        $('#login_btn').text('로그아웃');
-                    }
-                }
-            })
+            var user_id = `<%= user_id %>`;
+            if(user_id) {
+                $('#login_btn').text('로그아웃');
+            } 
             /* 로그인 로그아웃 버튼 변경 */
             $('#login_btn').click(function() {
                 if($(this).text() === '로그인') {

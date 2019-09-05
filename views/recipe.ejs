@@ -2,7 +2,7 @@
     <head>
         <meta charset = "utf-8" />
         <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
-        <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <link rel="stylesheet" type="text/css" href="/css/recipe.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
         <title>Recipe Page</title>
     </head>
@@ -10,12 +10,12 @@
         <div class = "app">
             <header id = "main_header">
                 <aside id="user_menu"></aside>
-                <h1>Recommend</h1>
+                <h1>Recipe</h1>
                 <button id="login_btn">로그인</button>
             </header>
             <div class = "content">
-              <ul class="channel_list">
-
+              <h1>이런 레시피는 어때요?(소개글)</h1>
+              <ul>
               </ul>
             </div>
             <nav id = "main_footer">
@@ -35,24 +35,26 @@
                 console.log(data);
                 for(var i = 0;i<data.length;i++)
                 {
-                let recipe_id = data[i].recipe_id;
-                let recipe_name =data[i].recipe_name;
-                let time = data[i].time;
-                let amount = data[i].amount;
-                let level =data[i].level;
-                let img = data[i].img_url;
-                $('.channel_list').append(`
-                <li class = "recipe_item">
-                    <div class = "thumb">
-                    <img src = "${img}"
-                    style = "max-width: 100%;height:auto"/>
-                    </div>
-                    <strong class = "title">
-                    ${recipe_name}.<br>
-                    ${time} ${level}
-                    </strong>
-                </li>`)
-                } 
+                let recipe_id = data[i].recipe_id,
+                    recipe_name =data[i].recipe_name,
+                    time = data[i].time,
+                    amount = data[i].amount,
+                    level =data[i].level,
+                    img = data[i].img_url;
+                $('.content ul').append(`
+                <li>
+                  <h3>${recipe_name}</h3>
+                  <div name = "image"
+                  style = "background:url('${img}');
+                  background-size: 100% 100%;">
+                    <span>난이도: ${level}</span>
+                  </div>
+                  <div name = "description">
+                    <span>${amount}</span>
+                    <span>${time}</span>
+                  </div>
+                </li>`);
+                }
             $('li').bind('click',function(e){
             new Promise((res,rej)=>{
               let result = confirm('이 레시피를 선택하시겠습니까?');
@@ -94,24 +96,26 @@
                 console.log(data);
                 for(var i = 0;i<data.length;i++)
                 {
-                let recipe_id = data[i].recipe_id;
-                let recipe_name =data[i].recipe_name;
-                let time = data[i].time;
-                let amount = data[i].amount;
-                let level =data[i].level;
-                let img = data[i].img_url;
-                $('.channel_list').append(`
-                <li class = "recipe_item">
-                    <div class = "thumb">
-                    <img src = "${img}"
-                    style = "max-width: 100%;height:auto"/>
-                    </div>
-                    <strong class = "title">
-                    ${recipe_name}.<br>
-                    ${time} ${level}
-                    </strong>
-                </li>`)
-                } 
+                  let recipe_id = data[i].recipe_id,
+                    recipe_name =data[i].recipe_name,
+                    time = data[i].time,
+                    amount = data[i].amount,
+                    level =data[i].level,
+                    img = data[i].img_url;
+                $('.content ul').append(`
+                <li>
+                  <h3>${recipe_name}</h3>
+                  <div name = "image"
+                  style = "background:url('${img}');
+                  background-size: 100% 100%;">
+                    <span>난이도: ${level}</span>
+                  </div>
+                  <div name = "description">
+                    <span>${amount}</span>
+                    <span>${time}</span>
+                  </div>
+                </li>`);
+                }
             $('li').bind('click',function(e){
             new Promise((res,rej)=>{
               let result = confirm('이 레시피를 선택하시겠습니까?');
@@ -153,6 +157,9 @@
                         location.href = '/recipe';
                     }
                 });
+                $('#back').click(() => {
+                    history.back();
+                })
                 $('#reload').click(() => {
                     location.reload();
                 });
@@ -160,17 +167,11 @@
                  location.href = '/main';
                 }); 
                 /* 로그인 관련 */
-            /* 로그인 ajax */
-            $.ajax({
-                url: '/is_login',
-                type: 'get',
-                datatype: 'json',
-                success: function(flag) {
-                    if(flag) {
-                        $('#login_btn').text('로그아웃');
-                    }
-                }
-            })
+            var user_id = `<%= user_id %>`;
+            if(user_id) {
+                $('#login_btn').text('로그아웃');
+            } 
+            
             /* 로그인 로그아웃 버튼 변경 */
             $('#login_btn').click(function() {
                 if($(this).text() === '로그인') {
