@@ -71,8 +71,9 @@ app.get('/',(req,res)=>{
         res.end(html)
     });
 });
-app.get('/login',(req,res)=>{
-    res.render('login',{},(err,html) => {
+app.get('/login/:errlevel',(req,res)=>{
+    
+    res.render('login',{err_level : req.params.errlevel},(err,html) => {
         if(err) {
             console.log('err?');
             throw err;
@@ -80,6 +81,14 @@ app.get('/login',(req,res)=>{
         res.end(html)
     });
 });
+app.get('/login',(req,res) => {
+    res.render('login',{err_level: undefined},(err,html) => {
+        if(err) {
+            throw err;
+        }
+        res.end(html);
+    });
+})
 app.get('/loginError/:level',(req,res)=>{
     var title = 'Login Page',
         append = '';
@@ -398,85 +407,10 @@ app.get('/setRecipe',(req,res)=>{
     })
 })
 app.get('/test',(req,res)=>{
-    //Check Init Data
-    const cheerio = require('cheerio'),
-          fs = require('fs');
-
-          //Init Data
-    if(true){
-    const list = require('./public/js/linked_list'),
-          Data = require('./public/js/recipe.js')(),
-          initTable = function(table,count) {
-            if(count > 0) {
-                table.push(new list());
-                return initTable(table,count-1);
-            }
-            else {
-                return table;
-            }
-        },json = async function(wr,filename,result) {
-            if(wr === 'r') {
-                var output = fs.readFileSync(__dirname+filename,'utf-8',(err,data) => {
-                    if(err) {
-                        throw err;
-                    }
-                    console.log('Read Success');
-                });
-                output = JSON.parse(output);
-                return output;
-
-            }
-            else {
-                result = JSON.stringify(result);
-                return fs.writeFile(__dirname+filename,result,'utf-8',(err,data) => {
-                    if(err) {
-                        throw err;
-                    }
-                    console.log('Write Success');
-                });
-            }
-        };
-    let $ = null,
-        query = null,
-        ingrd_list = new Array(),
-        recipe_table = new Array();
-
-        recipe_table = initTable(recipe_table,10);
-
-    $ = cheerio.load(fs.readFileSync(__dirname+'/public/recipe_data.xml','utf-8'),{xmlMode:true});
-
-    $('row').each(function() {
-        let recipe_id = $(this).find('RECIPE_ID').text(),
-            recipe_name = $(this).find('RECIPE_NM_KO').text(),
-            type_code = $(this).find('NATION_CODE').text(),
-            cooking_time = $(this).find('COOKING_TIME').text(),
-            level = $(this).find('LEVEL_NM').text(),
-            img_url = $(this).find('IMG_URL').text(),
-            classify_code = $(this).find('TY_CODE').text(),
-            amount = $(this).find('QNT').text();
-        recipe_table[recipe_id % 10].append(new Data.Recipe(recipe_id,recipe_name,type_code,classify_code,cooking_time,amount,level,img_url));
-    });
-    $ = cheerio.load(fs.readFileSync(__dirname+'/public/ingrd_data.xml','utf-8'),{xmlMode: true});
-    $('row').each(function(){
-        let recipe_id = $(this).find('RECIPE_ID').text(),
-            ing_name = $(this).find('IRDNT_NM').text(),
-            ing_amount = $(this).find('IRDNT_CPCTY').text(),
-            ing_ty_code = $(this).find('IRDNT_TY_CODE').text(),
-            cur = null;
-
-        ingrd_list.push(new Data.Ingredient(recipe_id,ing_name,ing_amount,ing_ty_code));
-        cur = recipe_table[recipe_id%10]._head;
-        while(cur.next)
-        {
-            cur = cur.next;
-            if(cur.data.recipe_id === recipe_id)
-            {
-                cur.data.count_ingrd++;
-            }
-        }
-    });
-    var output_data = json('r','/public/ingrd_data.json');
-}
+    var IBCF = require('./IBCF.js'),
+        ibcf = new IBCF();
+    res.send(ibcf.excute(1));
+    
 });
 app.get('/recommend/:way',(req,res) => {
 var way = req.params.way,
@@ -502,6 +436,16 @@ app.get('/process_recommend',(req,res) => {
               return result;
           },jsonParse = function(data) {
               return JSON.parse(data);
+          },find = function(key,arr,predi) {
+             var result = undefined;
+              for(var i = 0,len = arr.length;i<len;i++)
+              {
+                if(key === predi(arr[i])) {
+                    result = arr[i].key;
+                    break;
+                }
+              }
+              return result;
           };
 
     let recipe_table = [],
@@ -804,7 +748,8 @@ var user_id = 'dygmm4288';
             };
 
             return ubCF;
-        })();
+        })(), IBCF = require('./IBCF.js'),
+              ibcf = new IBCF();
         /*Testing */
             arr_user = [];
         arr_user.push(new User('이진호',new Data().setData([1,3,5,6],[3,1])));
@@ -813,16 +758,16 @@ var user_id = 'dygmm4288';
         //데이터 접근 arr_user[0].data[0].recipe_id// arr_user[0].data[0].count;
       var result = null,
           to_send_arr = [];
-        result = (new ubCF().excute(arr_user,'이가온'));
+        result = (new ubCF().excute(arr_user,'이진호'));
 
+        console.log(result);
         result.forEach(value => {
             /* recipe_id : int, count: string? */
             var cur = recipe_table[value.recipe_id%10]._head;
-
+            
             while(cur.next) {
                 cur = cur.next;
-                var recipe_id = cur.data.recipe_id
-
+                var recipe_id = cur.data.recipe_id;
                 if(recipe_id === value.recipe_id.toString()) {
                     to_send_arr.push(cur.data);
                 }
@@ -893,27 +838,28 @@ app.get('/db_query',(req, res) => {
         });
     }
 });
-app.post('/form_receiver',async (req,res) => {
+app.post('/form_receiver',(req,res) => {
     const uid = req.body.uid,
           upw = req.body.upwd,
         DataBase = require('./public/js/DataBase'),
-        database = new DataBase(),
+        db = new DataBase(),
         sess = req.session;
 
     let err_level = null;
     return new Promise((resolve,reject) => {
-        database.query('select * from user where user_id = ?',uid).then((row) => {
-            database.close().then(() => {
+        db.query('select * from user where user_id = ?',uid).then((row) => {
+            //Error
+            db.close().then(() => {
                 console.log('Closing Connection');
             }).catch((err) => {
                 console.log(`'Closing Error : ${err.code}`);
             });
-            //사용자 아이디 정보가 없음
+            //None User information
             if(row.length === 0) {
                 console.log('사용자 아이디 정보 없음');
                 err_level = 1;
                 reject(err_level);
-            }//사용자 아이디 정보가 같음.
+            }//Correct
             else if(row[0].user_password === upw) {
                 resolve();
             }//사용자 아이디는 있으나 비밀번호가 같지 않음.
@@ -928,10 +874,10 @@ app.post('/form_receiver',async (req,res) => {
     }).then(() => {
         sess.user_id = uid;
         console.log(sess);
-        res.redirect('/main');
+        res.send('login success');
     })
     .catch((err_level) => {
-        res.redirect(`/loginError/${err_level}`);
+        res.redirect(`/login/${err_level}`);
     });
 });
 app.get('/db_findUser',(req,res) => {

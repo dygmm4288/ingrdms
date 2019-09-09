@@ -30,12 +30,49 @@
         </div>
         <script>
             $(document).ready(() => {
+                /* Initial */
+                $('.app').css('background',`url('../img/login_page.png') center no-repeat`);
+                $('.app').css('background-size','90vw 90vh');
+                /* Button */
                 $('#skipButton').click(()=>{
-               location.href = 'main';
-               });
-               $('.app').css('background',`url('../img/login_page.png') center no-repeat`);
-               $('.app').css('background-size','90vw 90vh');
-               
+                location.href = '/main';
+                });
+                /* Login Error */
+                var err_level = `<%= err_level %>`,
+                    append_level = function (level) {
+                    if(level === '1') {
+                        return `<div style = "text-align:center; color:red; font-weight:bold;">
+                        입력한 아이디가 존재하지 않습니다. <br>다시 입력해주시길 바랍니다. </div>`;
+                    } else {
+                        return `<div style = "text-align:center; color:red; font-weight:bold;">
+                        입력한 비밀번호가 옳지 않습니다.<br> 다시 입력해주시길 바랍니다.</div>`;
+                }},prepend_element = function(string,jquery) {
+                        return jquery.prepend(string);
+                }
+                if(err_level) {
+                    var append = append_level(err_level);
+                    console.log(append);
+                    prepend_element(append,$('.content'));
+                }
+                /* Form */
+                $('form').submit((e) => {
+                    e.preventDefault();
+                    var url = $('form').attr('action'),
+                        data = $('form').serialize();
+                    console.log(url , data);
+                    $.ajax({
+                        url: url,
+                        type: 'post',
+                        data: data,
+                        success = function(data) {
+                            console.log(data);
+                            if(data === 'success') {
+                                location.href = '/main';
+                            }
+                        }
+                    })
+                })
+                
             })
            
         </script>

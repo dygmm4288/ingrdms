@@ -232,5 +232,3 @@ fs.writeFileSync(__dirname+'/public/item_based_CF.json',JSON.stringify(write_dat
     }
     return ibCF;
 })();
-var ibcf = new ibCF();
-ibcf.excute('20');
