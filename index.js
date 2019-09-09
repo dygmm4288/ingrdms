@@ -231,7 +231,8 @@ app.get('/classify',(req,res)=>{
            </nav>
         </div>`,
         ` /* 로그인 관련 */
-        if(${user_id}) {
+        var user_id = '${user_id}';
+        if(user_id !== 'undefined') {
             $('#login_btn').text('로그아웃');
         }
         /* 로그인 로그아웃 버튼 변경 */

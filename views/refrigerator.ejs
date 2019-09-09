@@ -144,7 +144,7 @@
 
                 if(date_diff < 3 && date_diff >= 1) {
                     
-                    state_bar = 'yellow';
+                    state_bar = '#FFFF19';
                 }
                 else if(date_diff < 1) {
                     state_bar = 'red';
@@ -152,8 +152,9 @@
 
                 insert_element = `
                 <div class = "recipe_item">
-                    <input type = "image" class = "ingrd_thumb" src = "../img/shirmp.jpg"/>
-                    <div style = "flex: 0 1 10%; background-color:${state_bar}"></div>
+                    <input type = "image" class = "ingrd_thumb" src = "../img/shirmp.jpg"
+                    style = "border: 5px solid ${state_bar}"/>
+                    
                     <strong>${value.ing_name}</strong>
                 </div>`
                 $(insert_element).prependTo(`#${id}`);

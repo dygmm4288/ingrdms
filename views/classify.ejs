@@ -8,6 +8,10 @@
     </head>
     <body>
         <div class="app">
+            <div id="loading-container">
+                <div id="loading"></div>
+                <div id="loading-message">Loading</div>
+            </div>
             <div id="main_header">
                 <aside id="user_menu"></aside>
                 <h1>Classify Page</h1>
@@ -85,6 +89,8 @@
                 location.href = '/logout';
             }
         });
+                /* 초기화 */
+        $('.content').css('overflow','scroll');
         })
         </script>
     </body>
