@@ -232,3 +232,21 @@ fs.writeFileSync(__dirname+'/public/item_based_CF.json',JSON.stringify(write_dat
     }
     return ibCF;
 })();
+
+/* 
+var request = require('request');
+var url = "https://dweet.io/get/latest/dweet/for/lee_two_song";
+request.get({
+    url: url,
+    type: 'json'
+},(err,response,body) => {
+    if(err) {
+        throw err;
+    }
+    console.log(JSON.parse(body).with[0].content);
+})
+ */
+var data = new FormData();
+data.append('name','이진호');
+data.append('age',23);
+console.log(data);

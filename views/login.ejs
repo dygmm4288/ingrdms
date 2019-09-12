@@ -59,7 +59,6 @@
                     e.preventDefault();
                     var url = $('form').attr('action'),
                         data = $('form').serialize();
-                    console.log(url , data);
                     $.ajax({
                         url: url,
                         type: 'post',
@@ -68,6 +67,9 @@
                             console.log(data);
                             if(data === 'login success') {
                                 location.href = '/main';
+                            }
+                            else {
+                                location.href = `/login/${data}`;
                             }
                         }
                     })

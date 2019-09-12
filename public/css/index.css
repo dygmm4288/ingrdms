@@ -110,7 +110,7 @@ a {
     border-radius: 10px;
     margin-top: 10px;
 }
-input[type=text], input[type=password]{
+input[type=text], input[type=password],input[type=email]{
     block-size: 10%;
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -403,6 +403,8 @@ a:link ,a:visited ,a:active{
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    overflow: hidden;
+
 }
 .find_list div {
     background: rgba(255, 199, 0, 0.7);
@@ -420,7 +422,13 @@ a:link ,a:visited ,a:active{
     font-size: 20px;
     padding: 0;
 }
-.find_list div input[type="text"] {
+.find_list div input[type="text"]{
+    flex: 0 0 50%;
+    width: 80%;
+    align-self:center;
+    font-size: 20px;
+}
+.find_list div input[type="email"] {
     flex: 0 0 50%;
     width: 80%;
     align-self:center;
@@ -484,15 +492,18 @@ a:link ,a:visited ,a:active{
     left: 25vw;
     width: 50vw;
     height: 50vw;
-    background-color: white;
+    background-color:lightgray;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
 }
 #loading {
-    flex: 0 0 50%;
+    width: 30vw;
+    height: 30vw;
+    border-radius: 50%;
     border: 2px solid transparent;
-    border-color: transparent #fff transparent #FFF;
+    border-color: transparent orange transparent white;
     -moz-animation: rotate-loading 1.5s linear 0s infinite normal;
     -moz-transform-origin: 50% 50%;
     -o-animation: rotate-loading 1.5s linear 0s infinite normal;

@@ -61,7 +61,6 @@ app.use(session({
       }
 }));
 //get
-
 app.get('/',(req,res)=>{
     res.render('welcome',{},(err,html) => {
         if(err) {
@@ -299,9 +298,11 @@ app.get('/classify/:classifyId',(req,res)=>{
 app.get('/processing',async (req,res)=>{
     var ingrdName = req.query.name || null,
    //var userid = req.session.userid;
-        userid = "dygmm4288",
+        userid = req.session_user_id || "dygmm4288",
         resist_date = new Date();
-        classify_id = req.query.classify_id;
+        classify_id = req.query.classify_id,
+        sensor_data = null,
+        request = require('request');
 
     const DataBase = require('./public/js/DataBase'),
           database = new DataBase();
@@ -329,17 +330,29 @@ app.get('/processing',async (req,res)=>{
    //사용자 정보가 없는 경우
     if(userid === undefined || ingrdName === null) {
        console.log("Not exsists Users Or ingrdName is null");
-       res.send("Fail");
+       res.send('fail');
     }
-      //사용자 정보가 있는 경우
+    //사용자 정보가 있는 경우
     else {
+        //sensor 데이타 추출
+    request.get({
+        url: "https://dweet.io/get/latest/dweet/for/lee_two_song",
+        type: "json",
+        async: false
+    },(err,response,body) => {
+        if(err) {
+            throw err;
+        }
+        var json = JSON.parse(body);
+        sensor_data = json.with[0].content;
+        //db 접속
         var query = 'select ing_name from ingredient_u where ingUser_id = ? and ing_name = ?';
         try{
             database.query(query,[userid,ingrdName]).then((row) =>{
                 return new Promise(async (response,reject) => {
                     if(row.length === 0) {
-                        query = 'insert into ingredient_u values(?,?,?,null)';
-                        await database.query(query,[userid,ingrdName,resist_date]);
+                        query = 'insert into ingredient_u values(?,?,?,?,?)';
+                        await database.query(query,[userid,ingrdName,resist_date,sensor_data.sensor_id,sensor_data.value]);
                         response();
                     }
                     else {
@@ -347,15 +360,19 @@ app.get('/processing',async (req,res)=>{
                     }
                 }).then(() => {
                     console.log('insert is success');
-                    res.send("Success");
+                    res.send('success');
                 }).catch(() => {
-                    res.send("Fail");
+                    res.send(null);
                 });
             });
         } catch(err) {
             console.log('Async Error');
             throw err;
         }
+
+        
+    });
+        
    }
 })
 app.get('/recipe',(req,res)=>{
@@ -845,16 +862,10 @@ app.post('/form_receiver',(req,res) => {
         DataBase = require('./public/js/DataBase'),
         db = new DataBase(),
         sess = req.session;
-
     let err_level = null;
     return new Promise((resolve,reject) => {
         db.query('select * from user where user_id = ?',uid).then((row) => {
             //Error
-            db.close().then(() => {
-                console.log('Closing Connection');
-            }).catch((err) => {
-                console.log(`'Closing Error : ${err.code}`);
-            });
             //None User information
             if(row.length === 0) {
                 console.log('사용자 아이디 정보 없음');
@@ -862,12 +873,18 @@ app.post('/form_receiver',(req,res) => {
                 reject(err_level);
             }//Correct
             else if(row[0].user_password === upw) {
+                console.log('correct login');
                 resolve();
             }//사용자 아이디는 있으나 비밀번호가 같지 않음.
             else {
                 err_level = 2;
                 reject(err_level);
             }
+            db.close().then(() => {
+                console.log('Closing Connection');
+            }).catch((err) => {
+                console.log(`'Closing Error : ${err.code}`);
+            });
         }).catch(err => {
             console.log(err);
             throw err;
@@ -878,7 +895,8 @@ app.post('/form_receiver',(req,res) => {
         res.send('login success');
     })
     .catch((err_level) => {
-        res.redirect(`/login/${err_level}`);
+        console.log(err_level);
+        res.send(`${err_level}`);
     });
 });
 app.get('/db_findUser',(req,res) => {
@@ -904,12 +922,57 @@ console.log(user_id);
             }
         })
         
-    } else {
-        //비밀번호 찾기
-
+    } //비밀번호 찾기 
+    else {
     }
 });
-
-app.get('/sensor',(req,res) => {
-    console.log(req.query);
+app.post('/db_signup',(req,res) => {
+    const user_id = req.body.id,
+          user_name = req.body.name,
+          e_mail = req.body.e_mail,
+          user_password = req.body.pwd,
+          DataBase = require('./public/js/DataBase'),
+          db = new DataBase();
+    let query = 'select user_id from user where user_id = ?';
+    try {
+        db.query(query,user_id)
+        .then((row) => {
+            console.log(`${query} result is ${row}`);
+            if(row.length === 0) {
+                query = 'insert into user values (?,?,?,?)';
+                return new Promise((resolve,reject) => {
+                    db.query(query,[user_id,user_password,user_name,e_mail])
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+                })
+                .then(() => {
+                    res.send('success');
+                })
+                .catch((err) => {
+                    console.log('insert error');
+                    res.send('fail');
+                    throw err;
+                })
+            } else {
+                res.send('exist');
+            }
+        })
+        .catch((err) => {
+            console.log(`${query} error ${err}`);
+            throw err;
+        })
+    } catch(err) {
+        throw err;
+    }
+    
+    
+    
 })
+app.get('/sensor',(req,res) => {
+    
+})
+

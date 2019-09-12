@@ -7,8 +7,63 @@ var ubcf = (function() {
         /* Testing */
         
         var calcCosine = function(user_name,graph) {
-            var last = graph.first;
-            console.log(last);
+            var last = graph.first,
+                current_obj = null;
+            while(last.next) {
+                var cosine = 0;
+
+                if(last.key === user_name) {
+                    current = last.Vdata;
+                    last = last.next;
+                    continue;
+                }
+                if(current_obj) {
+                    cosine = 
+                    ((numerator(current_obj,last.Vdata,
+                        (obj1,obj2) => obj1.recipe_id === obj2.recipe_id,
+                        (obj1,obj2) => obj1.count * obj2.count)) / 
+                    (denominator(current_obj,last.Vdata,
+                        (obj1) => { pow(obj1.count,2)})
+                    
+                    )).toFixed(2);
+                    graph.insertTwoWayArc(graph,cosine,current.key,last.key);
+                }
+
+                last = last.next;
+            }
+        },pow = function(value,squred) {
+            return Math.pow(value,squred);
+        },sqrt = function(value) {
+            var result = null;
+            result = Math.sqrt(value);
+            return result;
+        },numerator  = function(obj1,obj2,predi,calc) {
+            var numerator = 0;
+
+            for(var x in obj1) {
+                for(var y in obj2) {
+                    if(predi(obj1[x],obj2[y])) {
+                        numerator +=  calc(obj1[x],obj2[y]);
+                        break;
+                    }
+                }
+            }
+            console.log(numerator);
+            return numerator;
+        },denominator = function(obj1,obj2,predi) {
+            var pow1 = 0,
+                pow2 = 0,
+                result = 0;
+            for(x in obj1) {
+                pow1 += predi(obj1);
+            }
+            for(x in obj2) {
+                pow2 += predi(obj2);
+            }
+            result += sqrt(pow1) * sqrt(pow2);
+            console.log(result);
+            return result;
+            
         }
         
     /* start ubcf */
@@ -23,7 +78,11 @@ var ubcf = (function() {
                 user = objArr[x];
             }
         }
-        calcCosine('이',graph);
+        /* Insert Cosine Data to Arc */
+        calcCosine('이진호',graph);
+        graph.show(function(last) {
+            console.log(last.arc);
+        })
     }
     return ubcf;
 })();

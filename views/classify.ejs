@@ -10,7 +10,7 @@
         <div class="app">
             <div id="loading-container">
                 <div id="loading"></div>
-                <div id="loading-message">Loading</div>
+                <div id="loading-message">측정중...</div>
             </div>
             <div id="main_header">
                 <aside id="user_menu"></aside>
@@ -34,35 +34,39 @@
             </div>
         </div>
         <script type = "text/javascript">
+        
         $(document).ready(() => {
+            var loading_hide = function() {$('#loading-container').hide();};
             $('.app').css('background','url()');
-            var data = [],
-                inputData = function(data,name,value) {
-                    return Array.prototype.concat.call(data,[{name:name,value:value}]);
-                };
-        $('.ingrd_thumb').click((onClick) => {
-                var current = onClick.currentTarget.name,
-                    classify_id = `<%= classifyId %>`;
+            
+            $('.ingrd_thumb').click((onClick) => {
 
-                    //함수형 프로그래밍 바람
+                var current = onClick.currentTarget.name,
+                    data = [],
+                    inputData = function(data,name,value) {
+                        return Array.prototype.concat.call(data,[{name:name,value:value}]);
+                    },
+                    classify_id = `<%= classifyId %>`;
+                
+                $('#loading-container').show();
                 data = inputData(data,'name',current);
                 data = inputData(data,'classify_id',classify_id);
-
+                
                 $.ajax({
                     url:"/processing",
                     data: data,
                     type: "get",
-                    async: false
+                    asnyc: false
                 }).done((data) => {
-                    if( data === "Success") {
-                        console.log('성공');
-                        alert("등록이 완료되었습니다.");
+                    if(data === 'success') {
+                        alert('등록이 완료되었습니다.');
+                        loading_hide();
+                    } else if(data === 'fail') {
+                        alert('오류 발생');
+                        loading_hide();
+                    } else {
+                        
                     }
-                    else if(data === "Fail") {
-                        alert("이미 등록된 재료입니다.");
-                    }
-                }).always(() => {
-                    data = [];
                 });
             });
         $('#back').click(() => {
@@ -91,6 +95,7 @@
         });
                 /* 초기화 */
         $('.content').css('overflow','scroll');
+        $('#loading-container').hide();
         })
         </script>
     </body>

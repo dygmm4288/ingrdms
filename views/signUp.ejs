@@ -17,7 +17,7 @@
             <form class = "find_list" >
                 <div>
                     <strong>아이디</strong>
-                    <input type="text" name = "id"required>
+                    <input type="text" name = "id"required autofocus>
                 </div>
                 <div>
                     <strong>이름</strong>
@@ -25,7 +25,7 @@
                 </div>
                 <div>
                     <strong>이메일</strong>
-                    <input type="text" name = "e-mail" required>
+                    <input type="text" name = "e_mail" required>
                 </div>
                 <div>
                     <strong>비밀번호</strong>
@@ -52,8 +52,31 @@
         /* FORM */
         $('form').submit((e) => {
             e.preventDefault();
-            var data = $('form').serialize();
-            console.log(data);
+            var data = $('form').serialize(),
+                data_arr = $('form').serializeArray(),
+                flag = data_arr[3].value === data_arr[4].value;
+            
+            if(flag){
+                $.ajax({
+                url: '/db_signup',
+                type: "POST",
+                data: data,
+                success : function(data) {
+                    console.log(data);
+                    if(data === 'success') {
+                        alert('회원등록이 완료되었습니다.');
+                        location.href = '/login';
+                    } else if(data === 'exist') {
+                        alert('이미 등록된 회원입니다.');
+                        location.reload();
+                    }
+                }
+            });
+            }
+            else {
+                alert('비밀번호가 일치하지 않습니다.');
+            }
+           
         })
         /* Navigation Header Btn */
         $('#login_btn').click(function() {
