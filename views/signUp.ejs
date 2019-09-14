@@ -37,7 +37,7 @@
                 </div>
                 <nav>
                     <input type="submit" value = "확인">
-                    <input type="button" value = "취소">
+                    <input type="button" id = "cx" value = "취소">
                 </nav>
             </form>
         </div>
@@ -91,6 +91,10 @@
         $('#reload').click(() => {
             location.reload();
         });
+        /* Button */
+        $('#cx').click(function() {
+            location.href = '/login';
+        })
     })
 </script>
 </html>

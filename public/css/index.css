@@ -590,9 +590,15 @@ a:link ,a:visited ,a:active{
     100%{opacity: 0}
 }
 .circle{
-    width: 37px;; height:34px; border-radius:50px;
+    position:fixed;
+    left: 80%;
+    top: 75%;
+    width: 15vw;
+    height: 15vw;
+    border-radius:50%;
     background-color: #f8b600;
     text-align: center;
+    z-index:2;
 }
 .plus{
 left:310px;
@@ -607,7 +613,7 @@ bottom: 15px;
     flex-direction: column;
     flex: 0 0 24%;
     align-items:center;
-    margin: 0 1 10 0;
+    margin: 10 1 0 0;
     height: 25vw;
 }
 .ingrd_list > input {

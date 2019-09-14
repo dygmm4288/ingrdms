@@ -32,6 +32,7 @@
                </div>
            </div>
         </div>
+        <a href="/classify"><input type="button" class = "circle" style ="font-size:20px;" value ="+"></a>
         <div class="slideButton"></div>
         <div class="slideButton"></div>
         <div class="app">    
@@ -58,10 +59,7 @@
             <% for(var i =0 ;i<4;i++){ %>
                 <div class="column">
                     <div class="floor" id = <%= i+1 %>>
-                        <a href="/classify" style = "align-self:center">
-                            <input type="button" class="circle" style = "font-size:20px"
-                            value = "+">
-                        </a>
+
                     </div>
                     <div class="line"></div>
                 </div>
@@ -99,7 +97,7 @@
             function nextSlide() {
                 if(slide) {
                     slide = 0;                    
-                    hide('#fresh');
+                    hide('#fresh')
                     showFade('#frozen',1000);
                     changeText('#main_header > h3','Freezer');
 
