@@ -1,4 +1,4 @@
-<html>
+ <html>
     <head>
         <meta charset = "utf-8" />
         <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
@@ -10,10 +10,12 @@
         <div id="mask"></div>
         <div id="popup">
            <div>
-               <div>
-                   <img src="../img/shirmp.jpg" alt="" class="ingrd_thumb">
+               <div class = "ingrd_information">
+                   <div style = "border: 1px solid black">
+                   </div>
                </div>
                <h1></h1>
+               <h1 class="data-weight"></h1>
            </div>
            <div>
                <strong>소비기한</strong>
@@ -114,6 +116,7 @@
             $('.slideButton').click((event) => {
                 nextSlide();
             });
+            /* ajax */
             $.ajax({
                 url: "/getRecipe", 
                 data: { user_id: user_id},               
@@ -131,17 +134,65 @@
                     today = new Date(),
                     getDate = function(today) {
                         return new Date(today.getFullYear(),today.getMonth(),today.getDate());
+                    },get_width_height = function(classify_id) {
+                        var width_css= 0,
+                            height_css = 0,
+                            result ={};
+                        switch(classify_id) {
+                            case "육류":
+                        width_css = 0;
+                        height_css = 0;
+                        break;
+                    case "채소":
+                        width_css = 50;
+                        height_css = 0;
+                        break;
+                    case "과일":
+                        width_css = 100;
+                        height_css = 55;
+                        break;
+                    case "수산물":
+                        width_css = 0;
+                        height_css = 55;
+                        break;    
+                    case "가공&amp;기타":
+                        width_css = 50;
+                        height_css = 55;
+                        break;
+                    case "양념&amp;소스":
+                        width_css = 100;
+                        height_css = 0;
+                        break;
+                    case "유제품":
+                        width_css = 0;
+                        height_css = 105;
+                        break;
+                    default:
+                        width_css = 0;
+                        height_css = 0;
+                        break;
+                        }
+                        result['width'] = width_css;
+                        result['height'] = height_css;
+                        return result;
                     };
-                    today = getDate(today);
+
+                today = getDate(today);
+                /* DataBase Data 처리 */
                 data.forEach((value)=>{
                 state_bar = 'green';
+                var ingrd_object = {expiry_date: value.expiry_date, weight: value.weight,sensor_id: value.sensor_id,classify: value.classify_id};
+                    cookie[value.ing_name] = ingrd_object,
+                    css = {
+                    width: 0,
+                    height: 0,};
+                
                 /*  날짜 계산*/
-                cookie[value.ing_name] = value.expiry_date;
                 date_arr = value.expiry_date.split('-');
                 date = new Date(date_arr[0],parseInt(date_arr[1])-1,date_arr[2]);
                 date_diff = parseInt((date - today)/day);
                 console.log(`${value.ing_name}의 남은 일수 ${date_diff}`);
-
+                
                 if(date_diff < 3 && date_diff >= 1) {
                     
                     state_bar = '#FFFF19';
@@ -149,11 +200,14 @@
                 else if(date_diff < 1) {
                     state_bar = 'red';
                 }
-
+                /* classify 계산 */
+                console.log(value.classify_id);
+                css = get_width_height(value.classify_id);
                 insert_element = `
                 <div class = "recipe_item">
-                    <input type = "image" class = "ingrd_thumb" src = "../img/shirmp.jpg"
-                    style = "border: 5px solid ${state_bar}"/>
+                    <input type = "button" class = "ingrd_thumb"
+                    style = "border: 5px solid ${state_bar};
+                             background-position: ${css.width}% ${css.height}%"/>
                     
                     <strong>${value.ing_name}</strong>
                 </div>`
@@ -174,9 +228,71 @@
                     height = $('.content').height(),
                     windowHeight = $(window).height(),
                     ing_name = $(this).children('strong').text(),
-                    reg_date = cookie[ing_name];
+                    reg_date = cookie[ing_name].expiry_date,
+                    weight = cookie[ing_name].weight,
+                    weight_string = null,
+                    classify_id = null,
+                    css = {
+                        width: 0,
+                        height: 0,
+                },  get_width_height = function(classify_id) {
+                var width_css = null,
+                    height_css = null;
 
-                $('#popup > div').eq(0).children('h1').text(ing_name);
+                switch(classify_id) {
+                    case "육류":
+                        width_css = 0;
+                        height_css = 0;
+                        break;
+                    case "채소":
+                        width_css = 50;
+                        height_css = 0;
+                        break;
+                    case "과일":
+                        width_css = 100;
+                        height_css = 55;
+                        break;
+                    case "수산물":
+                        width_css = 0;
+                        height_css = 55;
+                        break;    
+                    case "가공&amp;기타":
+                        width_css = 50;
+                        height_css = 55;
+                        break;
+                    case "양념&amp;소스":
+                        width_css = 100;
+                        height_css = 0;
+                        break;
+                    case "유제품":
+                        width_css = 0;
+                        height_css = 105;
+                        break;
+                    default:
+                        width_css = 0;
+                        height_css = 0;
+                        break;
+                }
+                var result = {};
+                result['width'] = width_css;
+                result['height'] = height_css;
+                return result; 
+            };
+                /* 무게 데이터 처리 */
+                weight = weight.toFixed(0);
+                weight_string = weight+'g';
+                if(weight > 1000) {
+                    wiehgt /= 1000;
+                    weight = weight.toFixed(2);
+                    weight_string = weight +"kg";
+                }
+                /* 분류 데이터 처리 */
+                classify_id = cookie[ing_name].classify;
+                css = get_width_height(classify_id);
+                console.log(css);
+                $('.ingrd_information > div').css('background-position',`${css.width}% ${css.height}%`);
+                $('#popup > div').eq(0).children('h1').eq(0).text(ing_name);
+                $('#popup > div').eq(0).children('h1').eq(1).text(weight_string);
                 $('#popup > div').eq(1).children('input').val(reg_date);
                 wrapWindow();
                 $('#popup').css(
@@ -186,7 +302,7 @@
                 $('#popup').animate({top:windowHeight}).promise().then(()=>{
                     return $('#popup').show().animate({top:windowHeight/2},500);
                 });
-
+           
 
 
             });

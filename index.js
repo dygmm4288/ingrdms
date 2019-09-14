@@ -182,9 +182,8 @@ res.render('refrigerator',{
 });
 });
 app.get('/getRecipe',(req,res) => {
-    //var user_id = req.query.user_id,
-    var user_id = 'dygmm4288',
-        query = 'select ing_name, expiry_date from ingredient_u where ingUser_id = ?';
+    var user_id = req.query.user_id,
+        query = 'select * from ingredient_u where ingUser_id = ?';
 
     const DataBase = require('./public/js/DataBase'),
           database = new DataBase();
@@ -351,8 +350,8 @@ app.get('/processing',async (req,res)=>{
             database.query(query,[userid,ingrdName]).then((row) =>{
                 return new Promise(async (response,reject) => {
                     if(row.length === 0) {
-                        query = 'insert into ingredient_u values(?,?,?,?,?)';
-                        await database.query(query,[userid,ingrdName,resist_date,sensor_data.sensor_id,sensor_data.value]);
+                        query = 'insert into ingredient_u values(?,?,?,?,?,?)';
+                        await database.query(query,[userid,ingrdName,resist_date,sensor_data.value,sensor_data.sensor_id,classify_id]);
                         response();
                     }
                     else {

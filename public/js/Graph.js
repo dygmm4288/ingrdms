@@ -193,7 +193,7 @@ var Queue = (function() {
     Graph.prototype.show = function(want) {
         var last = this.first;
         if(last) {
-            while(last.next !== null) {
+            while(last) {
                 want(last);
                 last = last.next;
             }

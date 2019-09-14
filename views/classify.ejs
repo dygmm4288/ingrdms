@@ -23,7 +23,7 @@
                         align-content:flex-start;flex-wrap:wrap;">
              <% value.forEach((v)=>{%>
             <li class = "ingrd_list">
-                <input type = "image" class = "ingrd_thumb" src = "../img/egg.png" name = "<%= v %>" />
+                <input type = "button" name = "<%= v %>" />
                 <strong><%= v%></strong>
             </li>
               <% }) %>
@@ -36,10 +36,53 @@
         <script type = "text/javascript">
         
         $(document).ready(() => {
-            var loading_hide = function() {$('#loading-container').hide();};
+
+            var loading_hide = function() {$('#loading-container').hide();},
+                url = '../img/classify.png',
+                width_css = null,
+                height_css = null,
+                classify_id = `<%= classifyId %>`;
+
+                switch(classify_id) {
+                    case "육류":
+                        width_css = 0;
+                        height_css = 0;
+                        break;
+                    case "채소":
+                        width_css = 50;
+                        height_css = 0;
+                        break;
+                    case "과일":
+                        width_css = 100;
+                        height_css = 55;
+                        break;
+                    case "수산물":
+                        width_css = 0;
+                        height_css = 55;
+                        break;    
+                    case "가공&amp;기타":
+                        width_css = 50;
+                        height_css = 55;
+                        break;
+                    case "양념&amp;소스":
+                        width_css = 100;
+                        height_css = 0;
+                        break;
+                    case "유제품":
+                        width_css = 0;
+                        height_css = 105;
+                        break;
+                    default:
+                        width_css = 0;
+                        height_css = 0;
+                        break;
+                }
             $('.app').css('background','url()');
-            
-            $('.ingrd_thumb').click((onClick) => {
+            /* 초기화 */
+            $('.ingrd_list > input')
+            .css('background-position',`${width_css}% ${height_css}%`);
+            $('.content').css('margin','10 0 0 0');
+            $('.ingrd_list > input').click((onClick) => {
 
                 var current = onClick.currentTarget.name,
                     data = [],
@@ -51,7 +94,7 @@
                 $('#loading-container').show();
                 data = inputData(data,'name',current);
                 data = inputData(data,'classify_id',classify_id);
-                
+
                 $.ajax({
                     url:"/processing",
                     data: data,

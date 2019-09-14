@@ -246,7 +246,56 @@ request.get({
     console.log(JSON.parse(body).with[0].content);
 })
  */
-var data = new FormData();
-data.append('name','이진호');
-data.append('age',23);
-console.log(data);
+
+new Promise((resolve,reject) => {
+    var DataBase = require('./public/js/DataBase'),
+    db = new DataBase(),
+    arr_user = [];
+var query = 'select * from user_recipe';
+var find = function(arr,value,predi) {
+    for(var i = 0,len=arr.length;i<len;i++)
+    {
+        if(predi(arr[i],value)) return i;
+    }
+    return -1;
+}
+    db.query(query,null).then((row) => {
+        db.close().catch((err) => {
+            reject(err);
+            if(err) {
+                throw err;
+            }
+        });
+    
+        row.forEach((value) => {
+            var data = {
+                recipe_id: null,
+                count : null
+            },  user_data = {
+                name: null,
+                data: [],
+            };
+            var index = find(arr_user,value.user_id,(arr,value) => arr.name === value);
+            if(index === -1) {
+                user_data['name'] = value.user_id;
+                data['recipe_id'] = value.recipe_id;
+                data['count'] = value.count;
+                user_data['data'].push(data);
+                arr_user.push(user_data);
+            } else {
+                data['recipe_id'] = value.recipe_id;
+                data['count'] = value.count;
+                arr_user[index].data.push(data);
+            }
+        });
+        resolve(arr_user);
+    }).catch((err) => {
+        if(err) {
+            throw err;
+        }
+    })
+}).then((arr_user) => {
+    var UBCF = require('./public/js/UBCF'),
+        ubcf = new UBCF();
+    ubcf.execute(arr_user,'dygmm4288');
+})
