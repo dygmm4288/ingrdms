@@ -1,10 +1,10 @@
 const mysql = require('mysql'),
       config = {
-        host: 'localhost',
+        host: 'us-cdbr-iron-east-02.cleardb.net',
         port: 3306,
-        user: 'root',
-        password: 'lee123321',
-        database: 'hungry',
+        user: 'bdc0bed1da5e8c',
+        password: '00e7407f',
+        database: 'heroku_18805a64d96da87',
         dateStrings: 'date'
       },
       DataBase = (function () {
