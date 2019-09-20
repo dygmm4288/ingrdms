@@ -287,7 +287,6 @@
                 /* 분류 데이터 처리 */
                 classify_id = cookie[ing_name].classify;
                 css = get_width_height(classify_id);
-                console.log(css);
                 $('.ingrd_information > div').css('background-position',`${css.width}% ${css.height}%`);
                 $('#popup > div').eq(0).children('h1').eq(0).text(ing_name);
                 $('#popup > div').eq(0).children('h1').eq(1).text(weight_string);

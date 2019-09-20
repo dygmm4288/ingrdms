@@ -1,10 +1,10 @@
 const mysql = require('mysql'),
       config = {
-        host: 'us-cdbr-iron-east-02.cleardb.net',
+        host: 'localhost',
         port: 3306,
-        user: 'bdc0bed1da5e8c',
-        password: '00e7407f',
-        database: 'heroku_18805a64d96da87',
+        user: 'root',
+        password: 'lee123321',
+        database: 'hungry',
         dateStrings: 'date'
       },
       DataBase = (function () {
@@ -37,6 +37,7 @@ const mysql = require('mysql'),
           DataBase.prototype.close = function() {
               return new Promise((res,rej) => {
                   this.connection.end(err => {
+                      console.log('closing');
                       if(err) {
                           return rej(err);
                       }

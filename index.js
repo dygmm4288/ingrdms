@@ -296,15 +296,12 @@ app.get('/classify/:classifyId',(req,res)=>{
 });
 app.get('/processing',async (req,res)=>{
     var ingrdName = req.query.name || null,
-   //var userid = req.session.userid;
         userid = req.session_user_id || "dygmm4288",
         resist_date = new Date();
-        classify_id = req.query.classify_id,
-        sensor_data = null,
-        request = require('request');
+        classify_id = req.query.classify_id;
 
     const DataBase = require('./public/js/DataBase'),
-          database = new DataBase();
+          db = new DataBase();
     /* 분류 별 날짜 기준 */
     switch(classify_id) {
         case '육류':
@@ -333,46 +330,68 @@ app.get('/processing',async (req,res)=>{
     }
     //사용자 정보가 있는 경우
     else {
-        //sensor 데이타 추출
-    request.get({
-        url: "https://dweet.io/get/latest/dweet/for/lee_two_song",
-        type: "json",
-        async: false
-    },(err,response,body) => {
-        if(err) {
-            throw err;
-        }
-        var json = JSON.parse(body);
-        sensor_data = json.with[0].content;
-        //db 접속
-        var query = 'select ing_name from ingredient_u where ingUser_id = ? and ing_name = ?';
-        try{
-            database.query(query,[userid,ingrdName]).then((row) =>{
-                return new Promise(async (response,reject) => {
-                    if(row.length === 0) {
-                        query = 'insert into ingredient_u values(?,?,?,?,?,?)';
-                        await database.query(query,[userid,ingrdName,resist_date,sensor_data.value,sensor_data.sensor_id,classify_id]);
-                        response();
-                    }
-                    else {
-                       reject();
-                    }
-                }).then(() => {
-                    console.log('insert is success');
-                    res.send('success');
-                }).catch(() => {
-                    res.send(null);
+        let query = "select * from sensor order by 'time' desc";
+        new Promise((resolve,reject) => {
+            db.query(query,null).then((row) => {
+                if(row.length !== 0) {
+                    let current_time = new Date(),
+                        result = {
+                        user_id: userid,
+                        ingrd_name: ingrdName,
+                        resist_date: resist_date,
+                        classify_id: classify_id,
+                        sensor_id: null,
+                        };
+                    
+                    row.forEach((value) => {
+                        temp_time = new Date(value.time);
+                        var diff_time = (current_time - temp_time)/(1000*60);
+                        if(diff_time < 2 && diff_time > 0) {
+                            result.sensor_id = value.sensor_id;
+                        }
+                    resolve(result);
                 });
+                }
+            
+            }).catch((err) => {
+                if(err) {
+                    reject(err);
+                    throw err;
+                }
             });
-        } catch(err) {
-            console.log('Async Error');
-            throw err;
-        }
+        }).then((result) => {
+            var query = 'select * from ingredient_u where ingUser_id = ? and ing_name = ?';
+                db.query(query,[result.user_id,result.ingrd_name]).then((row) => {
+                    let row_length = row.length;
+                    if(row_length === 0) {
+                        
+                        query = 'insert into ingredient_u values (?,?,?,?,?)';
+                        db.query(query,[result.user_id,result.ingrd_name,result.resist_date,result.classify_id,result.sensor_id])
+                        .then(() => {
+                            console.log("Inserting");
+                            res.send("success");
+                        }).catch((err) => {
+                            res.send("fail");
+                            if(err) {
+                                throw err;
+                            }
+                        });
+                } else if(row_length === 1) { 
+                    res.send('exsists');
+                } else {
 
-        
+                }
+        }).catch((err) => {
+            if(err) {
+                throw err;
+            }
+        });
+        }) .catch((err) => {
+            if(err) {
+                throw err;
+            }
     });
-        
-   }
+    }
 })
 app.get('/recipe',(req,res)=>{
     res.render('recipe',{},(err,html)=>{if(err)throw err;res.end(html);});
@@ -468,8 +487,9 @@ app.get('/process_recommend',(req,res) => {
     let recipe_table = [],
         ingrd_list = [];
         $ = null,
-        query = null;
-        //Init recipe_table and Ingrd_list
+        query = null,
+        target = req.session.user_id || 'dygmm4288';
+        //Init recipe_table and Ingrd_list For Content Recommend
         recipe_table = readFile(recipe_table,'/public/recipe_data.json',jsonParse);
         ingrd_list = readFile(ingrd_list,'/public/ingrd_data.json',jsonParse);
     //재료 기반.
@@ -582,7 +602,7 @@ app.get('/process_recommend',(req,res) => {
         return tmp_weight;
       };
 //testing Data user => dygmm4288
-var user_id = 'dygmm4288';
+var user_id = target;
     query = 'select * from ingredient_u where ingUser_id = ?';
     database.query(query,user_id).then(row => {
         if(row.length === 0) {
@@ -634,163 +654,94 @@ var user_id = 'dygmm4288';
     })
     } else {
         console.log('ubcf Start');
-        const User = (function() {
-            function User(name,data) {
-                this.name = name;
-                this.data = data;
-            };
-            return User;
-        })(),
-              Data = (function() {
-            function Data(){
-                this.data = new Array();
-            };
-            //Error 있음
-            Data.prototype.setData = function(recipe_id,count){
-                //레시피 번호가 배열이라면?
-                if(Array.isArray(recipe_id)){
-                    if(Array.isArray(count))
-                    {
-                     recipe_id.length === count.length ?
-                     recipe_id.forEach((value,index)=>{
-                         this.data.push(this.info(value,count[index]));
-                     }) :
-                     recipe_id.forEach((value,index)=>{
-                         index > count.length-1 ?
-                         this.data.push(this.info(value,count[count.length-1])) :
-                         this.data.push(this.info(value,count[index]));
-                     })
-                    }//선택횟수가 배열이 아니라면>
-                    else{
-                        recipe_id.forEach((value)=>{
-                            this.data.push(this.info(value,count));
-                        })
-                    }
-                }
-                //레시피 번호가 배열이 아니라면?
-                else{
-                    if(Array.isArray(count)){
-                        var e = new Error('Recipe_id is value and Count is array Error');
-                        e.name = 'NoMathingData';
-                        throw e;
-                    }
-                    else {
-                        this.data.push(this.info(recipe_id,count));
-                    }
-                }
-                return this.data;
-            };
-            Data.prototype.info = function(recipe_id,count)
-            {
-                const obj = {
-                   recipe_id: recipe_id,
-                   count: count
-                };
-                return obj;
-            };
-            return Data;
-        })(),
-              ubCF = (function(){
-            function ubCF() {}
-            ubCF.prototype.excute = function(arrObj,User){
-                /*
-                @params {Array Obj, User {String}}
-                @return {recipe_id Integer}
-                 */
-                var i = 0,
-                    Graph = require('./public/js/Graph.js'),
-                    graph = new Graph(),
-                    arr_length = arrObj.length,
-                    selected_user = null,
-                    user = null,
-                    temp_result = null,
-                    cosine_result = null,
-                    cosine = function(arrObj1,arrObj2) {
-                        var user1 = arrObj1.data,
-                        user2 = arrObj2.data,
-                        user1_recipe = null,
-                        user2_recipe = null,
-                        numerator = 0,//분자값
-                        denominator = 0,//분모값
-                        user1_pow_total = 0,
-                        user2_pow_total = 0
-                        
-                        for(var x in user1) {
-                            user1_recipe = user1[x].recipe_id;
-                            user1_pow_total += pow(user1[x].count,2);
-                            for(var y in user2) {
-                                user2_recipe = user2[y].recipe_id;
-                                if(user1_recipe === user2_recipe) {
-                                    numerator += (user1[x].count) * (user2[y].count);
-                                    break;
-                                }
-                            }
-                        }
-                        for(var x in user2) {
-                            user2_pow_total += pow(user2[x].count,2);
-                        };
-                        denominator = sqrt(user1_pow_total) * sqrt(user2_pow_total);
-                        return (numerator/ denominator).toFixed(2);
-                    
-                    },pow = function(data,squared) {
-                        return Math.pow(data,squared);
-                    },sqrt = function(data) {
-                        return Math.sqrt(data);
-                    };
-                const _ = require('lodash');
+        const IBCF = require('./public/js/IBCF.js'),
+              ibcf = new IBCF(),
+              UBCF = require('./public/js/UBCF'),
+              ubcf = new UBCF(),
+              DataBase = require('./public/js/DataBase'),
+              db = new DataBase(),
+              listFind = function(linked_list,predi) {
+                  var cur = linked_list._head;
+                  while(cur.next) {
+                      cur = cur.next;
+                      if(predi(cur)) return cur;
+                  }
+                  return -1;
+              };
 
-               for(i in arrObj){
-                   graph.insertVertex(arrObj[i].name,arrObj[i]);
-                   if(arrObj[i].name === User) {
-                        user = arrObj[i];
-                   }
-               };
-               //코사인 값 계산
-               for(i in arrObj){
-                    for(var j = parseInt(i)+1;j<arr_length;j+=1){
-                        /*
-                        @param {object}
-                        @return {int} 코사인 분자의 값
-                        */
-                        cosine_result = cosine(arrObj[i],arrObj[j]);
-                        //무방향 그래프 값 삽입
-                        graph.insertTwoWayArc(graph,cosine_result,arrObj[i].name,arrObj[j].name);
-                    }
-               };
-               selected_user = graph.findSimilar(User);
-               temp_result = _.differenceBy(selected_user.data,user.data,'recipe_id');
-               temp_result.sort(function(o) {return o.count;});
-               temp_result.length < 5 ? null : _.slice(temp_result,0,5);
-               return temp_result;
-            };
-
-            return ubCF;
-        })(), IBCF = require('./IBCF.js'),
-              ibcf = new IBCF();
-        /*Testing */
+        let to_send_arr = [],
             arr_user = [];
-        arr_user.push(new User('이진호',new Data().setData([1,3,5,6],[3,1])));
-        arr_user.push(new User('이가온',new Data().setData([1,2,3],[2,4,1])));
-        arr_user.push(new User('송훈섭',new Data().setData([1,2,4,5],[2,1,2,1])));
-        //데이터 접근 arr_user[0].data[0].recipe_id// arr_user[0].data[0].count;
-      var result = null,
-          to_send_arr = [];
-        result = (new ubCF().excute(arr_user,'이진호'));
 
-        console.log(result);
-        result.forEach(value => {
-            /* recipe_id : int, count: string? */
-            var cur = recipe_table[value.recipe_id%10]._head;
-            
-            while(cur.next) {
-                cur = cur.next;
-                var recipe_id = cur.data.recipe_id;
-                if(recipe_id === value.recipe_id.toString()) {
-                    to_send_arr.push(cur.data);
+        /* Init Array User for UBCF */
+        new Promise((resolve,reject) => {
+            var query = 'select * from user_recipe',
+                findIndex = function(arr,predi) {
+                    for(var i = 0,len = arr.length;i<len;i++)
+                    {
+                        if(predi(arr[i])) return i;
+                    }
+                    return -1;
+                },compareValue = function(value) {
+                    return function(target) {
+                        return (target.name === value);
+                    }
+                };
+            db.query(query,null).then((row) => {
+                db.close().catch((err) => {
+                    /* DB Closing Error */
+                    reject(err);
+                    if(err) {
+                        throw err;
+                    }
+                });
+                row.forEach((value) => {
+                    var index = findIndex(arr_user,compareValue(value.user_id)),
+                        data = {
+                        recipe_id: null,
+                        count : null
+                    },  user_data = {
+                        name: null,
+                        data: []
+                    };
+                    if(index === -1) {
+                        user_data['name'] = value.user_id;
+                        data['recipe_id'] = value.recipe_id;
+                        data['count'] = value.count;
+                        user_data['data'].push(data);
+                        arr_user.push(user_data);
+                    } else {
+                        data['recipe_id'] = value.recipe_id;
+                        data['count'] = value.count;
+                        arr_user[index].data.push(data);
+                    }
+                });
+                resolve(arr_user);
+            }).catch((err) => {
+                /* DB Error */
+                if(err) {
+                    throw err;
                 }
-            }
-        });
-        res.send(to_send_arr);
+            });
+        }).then((result) => {
+            var ubcf_result = ubcf.execute(result,target),
+                ibcf_result = ibcf.execute(ubcf_result[0].recipe_id);
+                ubcf_result.forEach((value) => {
+                    var recipe_id = value.recipe_id,
+                        cur = null;
+                    cur = listFind(recipe_table[recipe_id % 10],recipe_id => cur => cur.data.recipe_id === recipe_id);
+                    to_send_arr.push(cur.data);
+                });
+                ibcf_result.forEach((value) => {
+                   var recipe_id = parseInt(value.arc_recipe_id),
+                       cur = null;
+                    cur = listFind(recipe_table[recipe_id % 10],recipe_id => cur => cur.data.recipe_id === recipe_id);
+                    to_send_arr.push(cur.data);
+                    /* 중복되는것이 들어갈 수 있다. */
+                });
+                res.send(to_send_arr);
+        }).catch((err) => {
+            throw err;
+        })
     }
 
 });
@@ -972,6 +923,24 @@ app.post('/db_signup',(req,res) => {
     
 })
 app.get('/sensor',(req,res) => {
+    const DataBase = require('./public/js/DataBase'),
+          db = new DataBase();
+    let sensor_id = req.query.sensor_id,
+        value = parseFloat(req.query.value),
+        time = new Date(),
+        query = null;
+        console.log(req.query);
+    if(sensor_id && value !== undefined ) {
+        query = 'UPDATE sensor SET value = ? ,time = ? WHERE sensor_id = ?';
+        db.query(query,[value,time,sensor_id]).then((row) => {
+            console.log('Updating!');
+        }).catch((err) => {
+            if(err) {
+                throw err;
+            }
+        });
+    }
+    
     
 })
 

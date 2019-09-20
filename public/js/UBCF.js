@@ -4,7 +4,7 @@ var ubcf = (function() {
         var Graph = require('./Graph.js'),
             graph = new Graph();
     
-        var calcCosine = function(user_name,graph) {
+      var calcCosine = function(user_name,graph) {
             var last = graph.first,
                 current_obj = findInGraph(user_name,graph);
             if(current_obj){
@@ -19,9 +19,7 @@ var ubcf = (function() {
                             (obj1) => pow(obj1.count,2) )
                         
                         )).toFixed(2);
-                        console.log('현재 유저:',current_obj.key);
-                        console.log('상대 유저: ',last.key);
-                        console.log('코사인 값',cosine);
+                    
                         graph.insertTwoWayArc(graph,cosine,current_obj.key,last.key);
                     }
                     last = last.next;
@@ -80,17 +78,16 @@ var ubcf = (function() {
             graph.insertVertex(objArr[x].name,objArr[x]);
         }
         /* Insert Cosine Data to Arc */
-        console.log('타겟 유저:',target_user);
+        
         calcCosine(target_user,graph);
-        graph.show(function(last) {
-           console.log('현재 유저 ', last.key);
-           while(last.arc) {
-            console.log('현재 유저의 아크', last.arc.destination.key);
-            console.log('현재 유저의 아크의 값',last.arc.data);
-            last.arc = last.arc.nextArc;
-           }
-           
-        })
+        /* Find Similar with target_user */
+        var similar_user = graph.findSimilar(target_user),
+            target_user_vertex_data = graph.find(target_user).Vdata,
+            _ = require('lodash'),
+            temp_result = _.differenceBy(target_user_vertex_data.data,similar_user.data,'recipe_id');
+            temp_result.sort(o => o.count);
+            temp_result.length < 5 ? null : temp_result.slice(0,5);
+            return temp_result;
     }
     return ubcf;
 })();

@@ -1,6 +1,6 @@
 var ibCf = ( function () {
     function ibCf() {};
-    ibCf.prototype.excute = function (target_recipe) {
+    ibCf.prototype.execute = function (target_recipe) {
         target_recipe = toString(target_recipe);
         var recipe_arr = jsonParse(readFile('item_based_CF.json')),
             result = sameKeyObjectInArray(recipe_arr, object => {
@@ -29,7 +29,7 @@ var ibCf = ( function () {
 },readFile = function(data) {
     var result = null,
         fs = require('fs');
-    result = fs.readFileSync(__dirname + '/public/' + data, 'utf-8',(err,data) => {
+    result = fs.readFileSync(__dirname + '/../' + data, 'utf-8',(err,data) => {
         if(err) {
             throw err;
         }

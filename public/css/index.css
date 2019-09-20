@@ -376,6 +376,7 @@ a:link ,a:visited ,a:active{
 }
 .content nav > span {
     align-self: center;
+    z-index:5;
 }
 .content nav > img {
     width: 30px;
@@ -494,25 +495,27 @@ a:link ,a:visited ,a:active{
     -webkit-animation:Fade 4000ms infinite;
     background-color: #fcff4e
 }
-/* loader */
+/* loading popup */
 #loading-container {
     position: absolute;
     top: 30vh;
     left: 25vw;
     width: 50vw;
     height: 50vw;
-    background-color:lightgray;
+    background-color:rgba(255, 199, 0);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    border-radius: 5px;
+    z-index: 9001;
 }
 #loading {
     width: 30vw;
     height: 30vw;
     border-radius: 50%;
     border: 2px solid transparent;
-    border-color: transparent orange transparent white;
+    border-color: transparent darkorange transparent white;
     -moz-animation: rotate-loading 1.5s linear 0s infinite normal;
     -moz-transform-origin: 50% 50%;
     -o-animation: rotate-loading 1.5s linear 0s infinite normal;
@@ -522,6 +525,29 @@ a:link ,a:visited ,a:active{
     animation: rotate-loading 1.5s linear 0s infinite normal;
     transform-origin: 50% 50%;
 }
+#measure-container {
+    display: flex;
+    flex: 0 0 50%;
+    justify-content: space-between;
+    flex-direction: column;
+}
+#measure-message {
+    font-size: 15px;
+    width: 100%;
+    font-weight: bold;
+}
+#measure-button {
+    width: 80%;
+    background-color: gray;
+    -webkit-animation: fade 4000ms;
+    animation: fade 4000ms;
+    border: 1px solid black;
+    align-self: center;
+    flex: 0 0 30%;
+    border-radius: 5%;
+    font-weight: bold;
+    color: white;
+}
 @keyframes rotate-loading {
     0%  {transform: rotate(0deg);-ms-transform: rotate(0deg); -webkit-transform: rotate(0deg); -o-transform: rotate(0deg); -moz-transform: rotate(0deg);}
     100% {transform: rotate(360deg);-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); -o-transform: rotate(360deg); -moz-transform: rotate(360deg);}
@@ -561,6 +587,7 @@ a:link ,a:visited ,a:active{
     0%  {transform: rotate(0deg);-ms-transform: rotate(0deg); -webkit-transform: rotate(0deg); -o-transform: rotate(0deg); -moz-transform: rotate(0deg);}
     100% {transform: rotate(360deg);-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); -o-transform: rotate(360deg); -moz-transform: rotate(360deg);}
 }
+
 
 @keyframes loading-text-opacity {
     0%  {opacity: 0}

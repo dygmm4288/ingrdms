@@ -76,7 +76,7 @@ LinkedList.prototype.find = function(data,predicate) {
     var cur = this._head;
     while(cur.next) {
         cur = cur.next;
-        if(predicate(cur.data,data)) return 1; 
+        if(predicate(cur)) return cur; 
     }
     return -1;
 }

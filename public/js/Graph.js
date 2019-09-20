@@ -165,8 +165,7 @@ var Queue = (function() {
     var temp = this.first,
         queue = new Queue(),
         arc = null;
-
-    temp = this.first;
+        
     queue.enqueue(temp);
 
     while(queue.count) {
@@ -180,8 +179,7 @@ var Queue = (function() {
     temp = arc;
     while(arc) {
         if(arc.nextArc) {
-            console.log("arc is ",arc);
-            console.log("nextArc is ",arc.nextArc);
+            
             if(arc.nextArc.data > temp.data) {
                 temp = arc.nextArc;
             }
@@ -241,6 +239,16 @@ var Queue = (function() {
             }
         }
     };
+    Graph.prototype.find = function(fromKey) {
+        var last = this.first;
+        while(last) {
+            if(last.key === fromKey) {
+                return last;
+            }
+            last = last.next;
+        }
+        return -1;
+    }
       return Graph;
 })();
 module.exports = Graph;
