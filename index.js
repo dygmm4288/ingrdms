@@ -349,10 +349,14 @@ app.get('/processing',async (req,res)=>{
                         if(diff_time < 2 && diff_time > 0) {
                             result.sensor_id = value.sensor_id;
                         }
-                    resolve(result);
-                });
+                    });
+                    if(result.sensor_id) {
+                        resolve(result);
+                    } else {
+                        result.sensor_id = row[0].sensor_id;
+                        resolve(result);
+                    }
                 }
-            
             }).catch((err) => {
                 if(err) {
                     reject(err);
@@ -360,11 +364,12 @@ app.get('/processing',async (req,res)=>{
                 }
             });
         }).then((result) => {
-            var query = 'select * from ingredient_u where ingUser_id = ? and ing_name = ?';
-                db.query(query,[result.user_id,result.ingrd_name]).then((row) => {
+            //센서가 겹치는 지 확인.
+            var query = 'select * from ingredient_u where ingUser_id = ? and sensor_id = ?';
+                db.query(query,[result.user_id,result.sensor_id]).then((row) => {
                     let row_length = row.length;
+                    //센서가 겹치지 않는다. 삽입
                     if(row_length === 0) {
-                        
                         query = 'insert into ingredient_u values (?,?,?,?,?)';
                         db.query(query,[result.user_id,result.ingrd_name,result.resist_date,result.classify_id,result.sensor_id])
                         .then(() => {
@@ -375,9 +380,17 @@ app.get('/processing',async (req,res)=>{
                             if(err) {
                                 throw err;
                             }
-                        });
+                        });// 센서가 하나 겹친다. 업데이트
                 } else if(row_length === 1) { 
-                    res.send('exsists');
+                    query = 'update ingredient_u set ing_name = ? where sensor_id = ?';
+                    db.query(query,[result.ingrd_name,result.sensor_id]).then((row) => {
+                        console.log("Updating");
+                        res.send("update");
+                    }).catch((err) => {
+                        if(err) {
+                            throw err;
+                        }
+                    })
                 } else {
 
                 }

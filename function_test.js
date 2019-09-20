@@ -303,11 +303,54 @@
 //         ubcf = new UBCF();
 //     ubcf.execute(arr_user,'dygmm4288');
 // })
-var database = require('./public/js/DataBase'),
-    db = new database();
-db.query('select * from ingredient_u where ingUser_id = ? and ing_name = ?',['dygmm4288','돼지등심']).then((row)=>{
-    db.query('select * from sensor',null).then((row) => {
-        console.log(row);
-    });
-});
-db.close();
+/* const fs = require('fs'),
+      apikey = "445710056000a912b0f0477e477bf326e4b0e2e2f4b69a087f2100f6b980d681",
+      axios = require('axios'),
+      address = [];
+let url = `http://211.237.50.150:7080/openapi/${apikey}/xml/Grid_20150827000000000226_1/`,
+    start = 21,
+    end = 537;
+var i = start;
+while(i<end) {
+    address.push(url+`${i}/${i+20}`);
+    i += 20;
+}   
+const crawler = async() => {
+    await Promise.all(address.map(async(r) => {
+        const response = await axios.get(r);
+        if(response.status === 200) {
+            const xml = response.data;
+            fs.appendFile(__dirname+'/test.xml',xml,'utf-8',(err) => {
+                if(err) {
+                    throw err;
+                }
+                console.log('appending success');
+            });
+        } else {
+            console.log('crawler error');
+        }
+    }))
+}
+crawler(); */
+const fs = require('fs'),
+      apikey = "445710056000a912b0f0477e477bf326e4b0e2e2f4b69a087f2100f6b980d681",
+      axios = require('axios'),
+      address = [];
+let url = `http://211.237.50.150:7080/openapi/${apikey}/xml/Grid_20150827000000000226_1/`
+const crawler = async () => {
+    await new Promise(async (res,rej) => {
+        const response = await axios(url+'/21/400');
+        if(response.status === 200) {
+            const xml = response.data;
+            fs.writeFile(__dirname+'/test.xml',xml,'utf-8',(err)=>{
+                if(err) {
+                    throw err;
+                }
+                console.log('appending success');
+            })
+        }else {
+            console.log('fail')
+        }
+    })
+};
+crawler();

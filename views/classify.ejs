@@ -110,10 +110,10 @@
                     return Array.prototype.concat.call(data,[{name:name,value:value}]);
                 },
                 classify_id = `<%= classifyId %>`;
+                /* window */
             wrapWindow();
             $('#loading-container').show();
             
-        
             data = inputData(data,'name',current);
             data = inputData(data,'classify_id',classify_id);
             $('#measure-button').click((onClick)=>{
@@ -130,8 +130,8 @@
                     alert('등록이 완료되었습니다.');
                 } else if(data === 'fail') {
                     alert('오류 발생');
-                } else if(data === 'exsists') {
-                    alert('이미 등록된 재료입니다. ');
+                } else if(data === 'update') {
+                    alert('재료가 수정되었습니다.');
                 } else {
                     alert('오류');
                 }
