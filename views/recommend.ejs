@@ -21,13 +21,16 @@
                <div id="toContent">
                    <nav name = "right">
                        <span>내 냉장고 속 재료</span>
-                       <img src="../img/arrow.png" alt=""/>
                    </nav>
                </div>
                <div id="toUBCF">
                    <nav name = "left">
-                    <img src="../img/arrow.png" alt=""/>
-                    <span>사용자 주변 추천</span>
+                    <span> 사용자 주변 추천</span>
+                   </nav>
+               </div>
+               <div id="toIBCF">
+                   <nav name="center">
+                       <span>레시피 기반 추천</span>
                    </nav>
                </div>
             </div>
@@ -67,8 +70,10 @@
             /* FADE */
             $('#recommend_img div').fadeTo(900,1,() => {
                 $('#toContent').fadeTo(900,1,() => {
-                    $('#toUBCF').fadeTo(900,1);
-                });
+                    $('#toUBCF').fadeTo(900,1,() => {
+                        $('#toIBCF').fadeTo(900,1);
+                    })
+                })
             });
             /* CLICK */
             $('.content nav').click(function() {
@@ -76,9 +81,14 @@
                 if(direction === 'right') {
                     console.log('to Content');
                     location.href = 'recommend/content';
-                } else {
+                } 
+                else if(direction === 'left') {
                     console.log('to UBCF');
                     location.href = 'recommend/ubcf';
+                } 
+                else {
+                    console.log('to IBCF');
+                    location.href = 'recommend/ibcf';
                 }
             })
         });

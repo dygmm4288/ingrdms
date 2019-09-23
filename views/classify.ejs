@@ -12,7 +12,8 @@
             <div id="loading-container">
                 <div id = "measure-container">
                     <div id="measure-message">재료를 올려주세요.</div>
-                    <input type="button" id="measure-button" value = "측정"/>
+                    <input type="button" class="measure-button" value = "측정"/>
+                    <input type ="button" class="measure-button" value  = "측정하지 않음"/>
                 </div>
                 <div id="loading"></div>
                 <div id="loading-message">측정중...</div>
@@ -49,7 +50,8 @@
                 maskWidth = $(window).width();
             $('#mask').css({'width':maskWidth,'height':maskHeight});
             $('#mask').fadeTo("slow",0);
-          }
+          },hide = jquery => $(jquery).hide(),
+            show = jquery => $(jquery).show(),
             url = '../img/classify.png',
             width_css = null,
             height_css = null,
@@ -103,43 +105,50 @@
             loading_hide();
         })
         /* 재료입력 */
+        let data = [],
+            inputData = (data,name,value) => Array.prototype.concat.call(data,[{name:name,value:value}]);
         $('.ingrd_list > input').click((onClick) => {
             var current = onClick.currentTarget.name,
-                data = [],
-                inputData = function(data,name,value) {
-                    return Array.prototype.concat.call(data,[{name:name,value:value}]);
-                },
                 classify_id = `<%= classifyId %>`;
+            /* form data */
+            data = [];
+            data = inputData(data,'name',current);
+            data = inputData(data,'classify_id',classify_id);
                 /* window */
             wrapWindow();
             $('#loading-container').show();
-            
-            data = inputData(data,'name',current);
-            data = inputData(data,'classify_id',classify_id);
-            $('#measure-button').click((onClick)=>{
-                $('#measure-container').hide();
-                $('#loading').show();
-                $('#loading-message').show();
-                $.ajax({
+    });
+    $('.measure-button').click((onClick)=>{
+        let measure = onClick.currentTarget.value;
+            if(measure === "측정") {
+                /* measure loading window */
+                hide('#measure-container');
+                show('#loading, #loading-message');
+                data = inputData(data,'measure',true);
+            } else {
+                data = inputData(data,'measure',false);
+                hide('#measure-container');
+            }
+            $.ajax({
                 url:"/processing",
                 data: data,
                 type: "get",
                 asnyc: false
             }).done((data) => {
+                console.log(data);
                 if(data === 'success') {
                     alert('등록이 완료되었습니다.');
                 } else if(data === 'fail') {
                     alert('오류 발생');
                 } else if(data === 'update') {
                     alert('재료가 수정되었습니다.');
-                } else {
-                    alert('오류');
+                } else if(data === 'exist'){
+                    alert('재료가 이미 등록되어 있습니다.');
                 }
                 loading_hide();
-                });
-            })
-            
+                hide('#mask');
             });
+    });       
         $('#back').click(() => {
             location.href = '/classify';
         });

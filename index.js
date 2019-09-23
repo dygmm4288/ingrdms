@@ -71,7 +71,7 @@ app.get('/',(req,res)=>{
     });
 });
 app.get('/login/:errlevel',(req,res)=>{
-    
+
     res.render('login',{err_level : req.params.errlevel},(err,html) => {
         if(err) {
             console.log('err?');
@@ -149,7 +149,6 @@ app.get('/signUp',(req,res)=>{
         res.end(html);
     });
 });
-
 app.get('/main',(req,res)=>{
     const user_id = req.session.user_id
     res.render('main',{user_id: user_id},(err,html) => {
@@ -159,7 +158,7 @@ app.get('/main',(req,res)=>{
         }
         res.end(html);
     })
-})
+});
 app.get('/logout',(req,res)=>{
 
     req.session.destroy((err)=>{
@@ -168,7 +167,7 @@ app.get('/logout',(req,res)=>{
     }});
     backUrl = req.header('Referer') || '/';
     res.redirect(backUrl);
-})
+});
 app.get('/refrigerator',(req,res)=>{
 const user_id = req.session.user_id;
 
@@ -182,26 +181,59 @@ res.render('refrigerator',{
 });
 });
 app.get('/getRecipe',(req,res) => {
-    var user_id = req.query.user_id,
+    let user_id = req.query.user_id,
         query = 'select * from ingredient_u where ingUser_id = ?';
-
     const DataBase = require('./public/js/DataBase'),
-          database = new DataBase();
-    try {
-    database.query(query,user_id).then((row)=>{
-        if(row.length !== 0) {
-            console.log(row);
-            res.send(row);
-            }
-        else {
-            res.send([]);
-        }
-        }).catch((err) => {
+          db = new DataBase();
+    select(query,user_id).then((result) => {res.send(result)})
+    .catch((err) => {
+        if(err) {
             throw err;
+        }
+    })
+    async function select(query,args) {
+        let result = null;
+        await db.query(query,args).then((row) => result = row).catch((err) => {
+            if(err) {
+                throw err;
+            }
         });
+        return result;
     }
-    catch(err){
-        throw err;
+});
+app.get('/getWeight',(req,res) => {
+    const DataBase = require('./public/js/DataBase'),
+          db = new DataBase();
+    let user_id = req.query.user_id,
+        ingrd_name = req.query.ingrd_name,
+        query =
+    'select i.ingUser_id, i.ing_name, s.value\
+     from ingredient_u AS i , sensor AS s \
+     where i.sensor_id = s.sensor_id and i.ingUser_id = ? and i.ing_name = ?';
+
+    select(query,[user_id,ingrd_name]).then((result) => {
+        if(result){
+            if(result.length !== 0) {
+                res.send(`${result[0].value}`);
+            }
+            else {
+                res.send('');
+            }
+        }
+        else {
+            res.send('error');
+        }
+    });
+    async function select(query,args) {
+        let result = null;
+        await db.query(query,args).then((row) => {
+            result = row;
+        }).catch((err) => {
+            if(err) {
+                throw err;
+            }
+        })
+        return result;
     }
 });
 app.get('/classify',(req,res)=>{
@@ -296,12 +328,80 @@ app.get('/classify/:classifyId',(req,res)=>{
 });
 app.get('/processing',async (req,res)=>{
     var ingrdName = req.query.name || null,
-        userid = req.session_user_id || "dygmm4288",
+        userid = req.session.user_id || "dygmm4288",
         resist_date = new Date();
-        classify_id = req.query.classify_id;
-
+        classify_id = req.query.classify_id,
+        measure = req.query.measure;
     const DataBase = require('./public/js/DataBase'),
           db = new DataBase();
+    const insert = async (query,args) => {
+        await db.query(query,args).then(() => {
+            console.log('Inserting Success');
+        }).catch((err) => {
+            if(err) {
+                throw err;
+            }
+        });
+        },select = async (query,args) => {
+            let result = null;
+            await db.query(query,args).then((row) => {
+                result = row;
+            }).catch((err) => {
+                if(err) {
+                    throw err;
+                }
+            });
+            return result;
+        },checkSensor = (start,flag) => {
+           return new Promise((resolve,reject)=>{
+            setTimeout(async () => {
+                let query = "select * from sensor order by 'time' desc",
+                    diff_time = null,
+                    calcTime = (cur,diff) => (cur-diff)/(1000*60);
+                    if(!flag)
+                    {
+                        select(query,null).then((row) => {
+                        let sensor_id = null,
+                            last_time = new Date();
+                        if(row) {
+                            for(var i = 0,len = row.length;i<len;i++)
+                            {
+                                let temp_time = new Date(row[i].time);
+
+                                diff_time = Math.abs(calcTime(temp_time,start));
+                                console.log(row[i].sensor_id,diff_time);
+                                if(diff_time < 2 && diff_time > 0) {
+                                    sensor_id = row[i].sensor_id;
+                                    break;
+                                }
+                            }
+                            console.log(calcTime(last_time,start));
+                            if(sensor_id) {
+                                console.log('first if');
+                                flag = true;
+                                resolve(sensor_id);
+                            }
+
+                            else if(calcTime(last_time,start) > 0.5){
+                                console.log('second if');
+                                flag = true;
+                                resolve(sensor_id);
+                            }
+                            else {
+                                checkSensor(start,flag);
+                            }
+                        }
+
+                    })}
+            },5000);
+            }).catch((err) => {
+                if(err) {
+                    throw err;
+                }
+                reject(err);
+            })
+
+        };
     /* 분류 별 날짜 기준 */
     switch(classify_id) {
         case '육류':
@@ -330,85 +430,142 @@ app.get('/processing',async (req,res)=>{
     }
     //사용자 정보가 있는 경우
     else {
-        let query = "select * from sensor order by 'time' desc";
-        new Promise((resolve,reject) => {
-            db.query(query,null).then((row) => {
-                if(row.length !== 0) {
-                    let current_time = new Date(),
-                        result = {
-                        user_id: userid,
-                        ingrd_name: ingrdName,
-                        resist_date: resist_date,
-                        classify_id: classify_id,
-                        sensor_id: null,
-                        };
-                    
-                    row.forEach((value) => {
-                        temp_time = new Date(value.time);
-                        var diff_time = (current_time - temp_time)/(1000*60);
-                        if(diff_time < 2 && diff_time > 0) {
-                            result.sensor_id = value.sensor_id;
-                        }
-                    });
-                    if(result.sensor_id) {
-                        resolve(result);
-                    } else {
-                        result.sensor_id = row[0].sensor_id;
-                        resolve(result);
-                    }
-                }
-            }).catch((err) => {
-                if(err) {
-                    reject(err);
-                    throw err;
-                }
-            });
-        }).then((result) => {
-            //센서가 겹치는 지 확인.
-            var query = 'select * from ingredient_u where ingUser_id = ? and sensor_id = ?';
-                db.query(query,[result.user_id,result.sensor_id]).then((row) => {
+        /* 만약 측정을 바란다면 */
+        if(measure === 'true') {
+            let result = {
+                user_id: userid,
+                ingrd_name: ingrdName,
+                resist_date: resist_date,
+                classify_id: classify_id,
+                sensor_id: null,
+            };
+            checkSensor(new Date()).then((sensor_id) => {
+                result.sensor_id = sensor_id;
+                console.log(result);
+                let query = 'select * from ingredient_u where ingUser_id = ? and sensor_id = ?';
+                select(query,[result.user_id,result.sensor_id]).then((row) => {
                     let row_length = row.length;
-                    //센서가 겹치지 않는다. 삽입
                     if(row_length === 0) {
                         query = 'insert into ingredient_u values (?,?,?,?,?)';
-                        db.query(query,[result.user_id,result.ingrd_name,result.resist_date,result.classify_id,result.sensor_id])
+                        insert(query,[result.user_id,result.ingrd_name,result.resist_date,result.classify_id,result.sensor_id])
                         .then(() => {
-                            console.log("Inserting");
                             res.send("success");
                         }).catch((err) => {
                             res.send("fail");
                             if(err) {
                                 throw err;
                             }
-                        });// 센서가 하나 겹친다. 업데이트
-                } else if(row_length === 1) { 
-                    query = 'update ingredient_u set ing_name = ? where sensor_id = ?';
-                    db.query(query,[result.ingrd_name,result.sensor_id]).then((row) => {
-                        console.log("Updating");
-                        res.send("update");
+                        })
+                    }
+                    else if(row_length === 1) {
+                        query = 'update ingredient_u set ing_name = ? where sensor_id = ?';
+                        select(query,[result.ingrd_name,result.sensor_id]).then((row) => {
+                            console.log("Updating");
+                            res.send("update");
+                        }).catch((err) => {
+                            if(err) {
+                                throw err;
+                            }
+                        })
+                    }
+                    else {
+
+                    }
+                })
+
+            })
+
+        } else {
+            // 측정하기를 원하지 않는다 -> 바로 데이터 저장을 원한다.
+            let query = 'select ing_name from ingredient_u where ingUser_id = ? and ing_name = ?';
+            select(query,[userid,ingrdName])
+            .then((select_result) => {
+                if(select_result.length === 0) {
+                    query = 'insert into ingredient_u values (?,?,?,?,?)';
+                    insert(query,[userid,ingrdName,resist_date,classify_id,null]).then(()=> {
+                        res.send('success');
                     }).catch((err) => {
+                        res.send('fail');
                         if(err) {
                             throw err;
                         }
-                    })
+                    });
                 } else {
-
+                    res.send('exist');
                 }
-        }).catch((err) => {
+            });
+        }
+    }
+});
+app.get('/recipe',(req,res)=>{
+    res.render('recipe',{},(err,html)=>{if(err)throw err;res.end(html);});
+});
+app.get('/enrollRecipe',(req,res) => {
+    let user_id = req.query.user_id,
+        recipe_id = req.query.recipe_id,
+        query = null;
+        if(typeof recipe_id === 'string') {
+            recipe_id = parseInt(recipe_id);
+        }
+    const DataBase = require('./public/js/DataBase'),
+          db = new DataBase();
+    query = 'select recipe_id from user_recipe where user_id = ? and recipe_id = ?';
+    select(query,[user_id,recipe_id]).then((row) => {
+        let len = row.length;
+
+        if(len === 0) {
+            query = 'insert into user_recipe values(?,?,?)';
+            insert(query,[user_id,recipe_id,1]).then((result) => {
+                if(result === 'inserting') {
+                    res.send('enroll');
+                }
+                else {
+                    res.send('error');
+                }
+            });
+        }
+        else if(len > 0 ) {
+            query = 'update user_recipe set count = count + 1 where user_id =? and recipe_id = ?';
+            update(query,[user_id,recipe_id]).then((result) => {
+                console.log(result);
+                if(result === 'updating') {
+                    console.log('In updating',result);
+                    res.status(200).send('update');
+                }
+                else {
+                    res.send('error');
+                }
+            })
+        }
+    });
+    async function select(query,args) {
+        let result = null;
+        await db.query(query,args).then((row) => result = row).catch((err) => {
             if(err) {
                 throw err;
             }
         });
-        }) .catch((err) => {
+        return result;
+    }
+    async function update(query,args) {
+        let result = null;
+        await db.query(query,args).then(()=> result = 'updating').catch((err) =>{
             if(err) {
                 throw err;
             }
-    });
+        });
+        return result;
+    }
+    async function insert(query,args) {
+        let result = null;
+        await db.query(query,args).then((row) => result = 'inserting').catch((err) =>{
+            if(err) {
+                throw err;
+            }
+        });
+        return result;
     }
 })
-app.get('/recipe',(req,res)=>{
-    res.render('recipe',{},(err,html)=>{if(err)throw err;res.end(html);});
-});
 app.get('/recommend',(req,res)=>{
     var user_id = req.session.user_id;
 
@@ -459,7 +616,7 @@ app.get('/test',(req,res)=>{
     var IBCF = require('./IBCF.js'),
         ibcf = new IBCF();
     res.send(ibcf.excute(1));
-    
+
 });
 app.get('/recommend/:way',(req,res) => {
 var way = req.params.way,
@@ -501,15 +658,17 @@ app.get('/process_recommend',(req,res) => {
         ingrd_list = [];
         $ = null,
         query = null,
-        target = req.session.user_id || 'dygmm4288';
+        target = req.session.user_id,
+        way = req.query.way;
         //Init recipe_table and Ingrd_list For Content Recommend
         recipe_table = readFile(recipe_table,'/public/recipe_data.json',jsonParse);
         ingrd_list = readFile(ingrd_list,'/public/ingrd_data.json',jsonParse);
-    //재료 기반.
-    if(req.query.way === 'content'){
+    //재료 기반
+    console.log(req.query);
+    if(way === 'content'){
 
     const DataBase = require('./public/js/DataBase'),
-          database = new DataBase(),
+          db = new DataBase(),
           UserData = require('./public/js/userData')(),
           arr_userData = [],
           result_recommend = [];
@@ -533,7 +692,7 @@ app.get('/process_recommend',(req,res) => {
                     result_index = result_recommend.length - 1;
                     cur_result = result_recommend[result_index];
                     tmp_weight = stateWeight(v.state);
-                    cur_result.weight += weightCalc(tmp_weight,10,0.1);
+                    cur_result.weight += weightCalc(tmp_weight,10,0.8);
                     tmp_weight = 0;
                     tmp_weight = primeWeight(is_prime,v.amount);
                     is_prime ? cur_result.prime_ingrd++ : cur_result.sub_ingrd++;
@@ -541,14 +700,16 @@ app.get('/process_recommend',(req,res) => {
                 } else {
                     cur_result = result_recommend[result_index];
                     tmp_weight = stateWeight(v.state);
-                    cur_result.weight += weightCalc(tmp_weight,10,0.1);
+                    cur_result.weight += weightCalc(tmp_weight,10,0.8);
                     tmp_weight = 0;
                     tmp_weight = primeWeight(is_prime,v.amount);
                     is_prime ? cur_result.prime_ingrd++ : cur_result.sub_ingrd++;
                     cur_result.weight += weightCalc(tmp_weight,10,0.1);
                 }
+                
             }
         }
+
       },findIndex = function(list,predicate) {
           for(var i = 0,len =list.length;i<len;i++) {
               if(predicate(list[i])) {
@@ -613,63 +774,86 @@ app.get('/process_recommend',(req,res) => {
             }
         }
         return tmp_weight;
-      };
-//testing Data user => dygmm4288
-var user_id = target;
-    query = 'select * from ingredient_u where ingUser_id = ?';
-    database.query(query,user_id).then(row => {
-        if(row.length === 0) {
-            console.log('not exsist');
-            return null;
+      },select = async (query,args) => {
+          let result = null;
+          await db.query(query,args).then((row) => result = row);
+          return result;
+      },getDate = function(today) {
+        return new Date(today.getFullYear(),today.getMonth(),today.getDate());
+      },calcDate = function(date,today) {
+        let date_arr = date.split('-'),
+            date_diff = null,
+            day = 1000*60*60*24;
+        date = new Date(date_arr[0],parseInt(date_arr[1])-1,date_arr[2]);
+        date_diff = parseInt((date - today) /day);
+        return date_diff;
+    },calcState = function(date_diff) {
+        let result = null;
+        if(date_diff < 3 && date_diff >= 1) {
+            result = '보통';
+        }
+        else if(date_diff < 1) {
+            result = '나쁨';
         }
         else {
-
-            row.forEach(value => {
-                arr_userData.push(new UserData.UserIngrd(user_id,value,'좋음',500));
-            });
-
-            return new Promise((respone,reject) => {
-            var name_u = null,
-                name_i = null;
-                //_compose 방법을 응용하면 될 듯 하다.
-            arr_userData.forEach(user_value => {
-            name_u = user_value.ingrd_name.ing_name;
-            ingrd_list.forEach((ingrd_value) => {
-                name_i = ingrd_value.ingredient_name;
-                if(name_u === name_i) {
-                    var cur = recipe_table[ingrd_value.ingRecipe_id % 10]._head,
-                        flag = ingrd_value.ing_ty_code == '3060001' ? true : false;
-                    content(cur,ingrd_value,user_value,flag);
-                    }
+           result = '좋음';
+        }
+        return result;
+    };
+    var user_id = target;
+        query = 'select * from ingredient_u where ingUser_id = ?';
+        select(query,user_id).then((row) => {
+            if(row.length !== 0) {
+                let today = getDate(new Date()),
+                    state = null;
+                row.forEach((value) => {
+                    state = calcState(calcDate(value.expiry_date,today));
+                    console.log('743line state is: ',state);
+                    arr_userData.push(new UserData.UserIngrd(user_id,value.ing_name,state,0));
                 });
-             });
-             result_recommend.forEach(value =>{
-                var prime = value.prime_ingrd,
-                    sub = value.sub_ingrd,
-                    total_count = value.count_ingrd,
-                    tmp_weight = 0;
-                tmp_weight += weightCalc(prime,total_count,14);
-                tmp_weight += weightCalc(sub,total_count,6);
-                value.weight = weightCalc(tmp_weight,20,0.2);
-             })
-             respone();
-            }).then(() => {
-                res.send(result_recommend);
-            }).catch((err) => {
-                console.log(err);
-            })
-        }
-    }).catch(err => {
-        if(err) {
-            console.log('query error');
-            throw err;
-        }
-    })
-    } else {
+                return new Promise((resolve,reject) => {
+                    let user_ing_name = null,
+                        data_ing_name = null;
+                    arr_userData.forEach((value) => {
+                        user_ing_name = value.ingrd_name;
+                        ingrd_list.forEach((ingrd_value) => {
+                            data_ing_name = ingrd_value.ingredient_name;
+                            if(user_ing_name === data_ing_name) {
+                                let cur = recipe_table[ingrd_value.ingRecipe_id % 10]._head,
+                                    flag = ingrd_value.ing_ty_code == '3060001' ? true: false;
+                                content(cur,ingrd_value,value,flag);
+                            }
+                        })
+                    })
+                    result_recommend.forEach((value) => {
+                        let prime = value.prime_ingrd,
+                            sub = value.sub_ingrd,
+                            total_count = value.count_ingrd,
+                            tmp_weight = 0;
+                        tmp_weight += weightCalc(prime,total_count,14);
+                        tmp_weight += weightCalc(sub,total_count,6);
+                        value.weight += weightCalc(tmp_weight,20,0.2);
+                        console.log('value weight is :',value.weight);
+                    })
+                    result_recommend.sort((a,b) => b.weight - a.weight);
+                    resolve();
+                }).then(() => {
+                    let len = result_recommend.length,
+                        result = result_recommend;
+                    len > 5 ? res.send(result.slice(0,6)) : res.send(result);
+                }).catch((err) => {
+                    if(err) {
+                        throw err;
+                    }
+                })
+
+            }
+        })
+
+    }
+    else if(way === 'ubcf') {
         console.log('ubcf Start');
-        const IBCF = require('./public/js/IBCF.js'),
-              ibcf = new IBCF(),
-              UBCF = require('./public/js/UBCF'),
+        const UBCF = require('./public/js/UBCF'),
               ubcf = new UBCF(),
               DataBase = require('./public/js/DataBase'),
               db = new DataBase(),
@@ -736,25 +920,70 @@ var user_id = target;
                 }
             });
         }).then((result) => {
-            var ubcf_result = ubcf.execute(result,target),
-                ibcf_result = ibcf.execute(ubcf_result[0].recipe_id);
+            var ubcf_result = ubcf.execute(result,target);
                 ubcf_result.forEach((value) => {
                     var recipe_id = value.recipe_id,
                         cur = null;
                     cur = listFind(recipe_table[recipe_id % 10],recipe_id => cur => cur.data.recipe_id === recipe_id);
                     to_send_arr.push(cur.data);
                 });
-                ibcf_result.forEach((value) => {
-                   var recipe_id = parseInt(value.arc_recipe_id),
-                       cur = null;
-                    cur = listFind(recipe_table[recipe_id % 10],recipe_id => cur => cur.data.recipe_id === recipe_id);
-                    to_send_arr.push(cur.data);
-                    /* 중복되는것이 들어갈 수 있다. */
-                });
                 res.send(to_send_arr);
         }).catch((err) => {
             throw err;
         })
+    }
+    else if(way === 'ibcf') {
+        const DataBase = require('./public/js/DataBase'),
+              db = new DataBase(),
+              IBCF = require('./public/js/IBCF'),
+              ibcf = new IBCF(),
+              to_send_arr = [];
+        let ibcfResult = [];
+        query = "select * from user_recipe where user_id = ?";
+        select(query,target).then((row) => {
+            row.forEach((value) => {
+                let temp_result = ibcf.execute(value.recipe_id);
+                temp_result.forEach((temp_value) => {
+                    if(findIndex(ibcfResult,value => temp_value.arc_recipe_id === value.arc_recipe_id) === -1) {
+                        ibcfResult.push(temp_value);
+                    }
+                    console.log('temp value is:',temp_value);
+                })
+            });
+            if(ibcfResult) {
+                console.log('last ibcfResult : ',ibcfResult);
+                ibcfResult.forEach((value) => {
+                    let recipe_id = parseInt(value.arc_recipe_id),
+                        cur = null;
+                    cur = listFind(recipe_table[recipe_id % 10],recipe_id => cur => cur.data.recipe_id === recipe_id);
+                    to_send_arr.push(cur.data);
+                })
+                res.send(to_send_arr);
+            }
+        }) 
+        async function select(query,args){
+            let result = null;
+            await db.query(query,args).then((row) => {
+                result = row;
+            })
+            return result;
+        }
+        function listFind(linked_list,predi) {
+            var cur = linked_list._head;
+            while(cur.next) {
+                cur = cur.next;
+                if(predi(cur)) return cur;
+            }
+            return -1;
+        };
+        function findIndex(arr,predi) {
+            for(let i = 0,len=arr.length;i<len;i++)
+            {
+                if(predi(arr[i])) return i;
+            }
+            return -1;
+        };
+        
     }
 
 });
@@ -768,7 +997,7 @@ app.get('/db_query',(req, res) => {
     var text = req.query.text,
         query = null,
         date = req.query.date,
-        id = req.query.user_id || 'dygmm4288',
+        id = req.query.id || 'dygmm4288',
         ing_name = req.query.name,
         flag = {response: true};
 
@@ -884,8 +1113,8 @@ console.log(user_id);
                 throw err;
             }
         })
-        
-    } //비밀번호 찾기 
+
+    } //비밀번호 찾기
     else {
     }
 });
@@ -931,9 +1160,9 @@ app.post('/db_signup',(req,res) => {
     } catch(err) {
         throw err;
     }
-    
-    
-    
+
+
+
 })
 app.get('/sensor',(req,res) => {
     const DataBase = require('./public/js/DataBase'),
@@ -953,7 +1182,7 @@ app.get('/sensor',(req,res) => {
             }
         });
     }
-    
-    
+
+
 })
 

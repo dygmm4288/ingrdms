@@ -332,25 +332,56 @@ const crawler = async() => {
     }))
 }
 crawler(); */
-const fs = require('fs'),
-      apikey = "445710056000a912b0f0477e477bf326e4b0e2e2f4b69a087f2100f6b980d681",
-      axios = require('axios'),
-      address = [];
-let url = `http://211.237.50.150:7080/openapi/${apikey}/xml/Grid_20150827000000000226_1/`
-const crawler = async () => {
-    await new Promise(async (res,rej) => {
-        const response = await axios(url+'/21/400');
-        if(response.status === 200) {
-            const xml = response.data;
-            fs.writeFile(__dirname+'/test.xml',xml,'utf-8',(err)=>{
-                if(err) {
-                    throw err;
-                }
-                console.log('appending success');
-            })
-        }else {
-            console.log('fail')
+const database = require('./public/js/DataBase'),
+      db = new database();
+const select = async (query,args) => {
+    let result = null;
+    await db.query(query,args).then((row) => {
+        result = row;
+    }).catch((err)=>{
+        if(err) {
+            throw err;
         }
-    })
+    });
+    return result;
+}, diffTime = function(cur,last) {
+    let result = null;
+    result = (cur-last)/(1000*60);
+    return result;
+}, findSensor = function(cur) {
+    
+}, checkSensor = (cur) => {
+    let start_time = new Date();
+    setTimeout(()=>{
+        let query = "select * from sensor order by 'time' desc",
+            diff_time = null;
+        select(query,null).then((row) => {
+            let sensor_id = null,
+                last_time = new Date();
+            for(var i = 0,len = row.length;i<len;i++)
+            {
+                let temp_time = new Date(row[i].time);
+                diff_time = diffTime(start_time,temp_time);
+                console.log(row[i].sensor_id, diff_time);
+                if(diff_time < 2 && diff_time > 0) {
+                    sensor_id = row[i].time;
+                    break;
+                }
+            }
+            console.log('cur - last',diffTime(last_time,cur))
+            if(sensor_id !== null) {
+                console.log('first if');
+                return sensor_id;
+            }
+            else if(diffTime(last_time,cur) > 0.5) {
+                console.log('second if');
+                return sensor_id;
+            } 
+            else {
+                checkSensor(cur);
+            }
+        })
+    },5000);
 };
-crawler();
+let current_time = new Date();
+checkSensor(current_time);
