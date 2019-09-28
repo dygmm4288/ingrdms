@@ -121,7 +121,7 @@ input[type=text]:focus,input[type=password]:focus{
     background-color: lightblue;
     
 }
-.submitButton {
+.submitButton{
     block-size: 5%;
     width:45%;
     border: 1px solid #ccc;
@@ -174,15 +174,6 @@ a:link ,a:visited ,a:active{
     background-color: rgba(13,178,201,0.58);
     opacity: 0.6;
  }
-/* nav */
-.nav_login {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-.nav_login > div {
-    flex: 0 0 45%;
-}
     /* 팝업창 */
  #popup {
     position:fixed;
@@ -769,4 +760,3 @@ bottom: 15px;
 .box > a {
     align-self:center;
 }
-

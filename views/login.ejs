@@ -3,6 +3,7 @@
         <meta charset = "utf-8" />
         <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
         <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <link rel="stylesheet" type="text/css" href="/css/login.css"/>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
         <title>Login Page</title>
     </head>
@@ -65,6 +66,10 @@
                         }
                     })
                 })
+                /* Resize */
+                $(window).resize(e => {
+                    setSize('input[type=text,password]',input_size.width,input_size.heihgt);
+                })
                 /* Func */
                 function prependElement(jquery,string) {
                     return jquery.prepend(string);
@@ -76,7 +81,9 @@
                         <p>다시 입력해주시길 바랍니다.</p>
                     </div>`;
                 }
+            
             })
+
            
         </script>
     </body>
