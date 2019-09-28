@@ -4,46 +4,7 @@ const express = require('express'),
       session = require('express-session'),
       bodyParser = require('body-parser'),
       path =require('path');
-
-//func
-var func = (function Func() {
-    if(!(this instanceof Func)) {
-        return new Func();
-    }
-    Func.prototype.checkUser = function(sess) {
-        var state = null,
-                say_hello = null;
-            if(sess.user_id === undefined) {
-                state = '로그인';
-                say_hello = '반갑습니다.';
-            }
-            else {
-                state = '로그아웃';
-                say_hello = sess.user_name + '님 안녕하세요!';
-            }
-        return {
-            state: state,
-            say: say_hello
-        };
-    };
-    Func.prototype.content = function(title,name,style) {
-            var str = '';
-            if(!style) {
-                style = null;
-            }
-            str =
-            `<div style = "${style}" id = "${name}">
-                <p> ${title}
-                <br> <input type = "text" id = "${name}"/></p>
-            </div>`;
-            return str;
-    };
-    Func.prototype.setSess = function(sess,user_id,user_name) {
-        sess.user_id = user_id;
-        sess.user_name = user_name;
-    };
-}());
-
+const loginRouter = require('./routes/login');
 //use,set,engine
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -51,6 +12,7 @@ app.engine('html', require('ejs').renderFile);
 app.use(express.static(__dirname+'/public'));
 app.use(bodyParser.urlencoded({extended:false}));
 app.use('/node_modules',express.static(path.join(__dirname,'/node_modules')));
+app.use('/login',loginRouter);
 //session
 app.use(session({
     secret: 'ambc@!vsmkv#!&*!#EDNAnsv#!$()_*#@',
@@ -71,7 +33,6 @@ app.get('/',(req,res)=>{
     });
 });
 app.get('/login/:errlevel',(req,res)=>{
-
     res.render('login',{err_level : req.params.errlevel},(err,html) => {
         if(err) {
             console.log('err?');
@@ -80,14 +41,14 @@ app.get('/login/:errlevel',(req,res)=>{
         res.end(html)
     });
 });
-app.get('/login',(req,res) => {
+/* app.get('/login',(req,res) => {
     res.render('login',{err_level: undefined},(err,html) => {
         if(err) {
             throw err;
         }
         res.end(html);
     });
-})
+}) */
 app.get('/loginError/:level',(req,res)=>{
     var title = 'Login Page',
         append = '';
@@ -355,7 +316,7 @@ app.get('/processing',async (req,res)=>{
         },checkSensor = (start,flag) => {
            return new Promise((resolve,reject)=>{
             setTimeout(async () => {
-                let query = "select * from sensor order by 'time' desc",
+                let query = "select * from sensor order by time desc",
                     diff_time = null,
                     calcTime = (cur,diff) => (cur-diff)/(1000*60);
                     if(!flag)

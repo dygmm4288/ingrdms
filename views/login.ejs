@@ -8,24 +8,22 @@
     </head>
     <body>
         <div class = "app">
-            <header class = "#main_header">
-            </header>
             <div class = "content">
                 <form action= "/form_receiver" method ="POST">
                     <input type = "text"  size = "25" name ="uid" placeholder = "Enter User ID" required autofocus />
                     <input type = "password" size = "25" name = "upwd" placeholder = "Enter User PassWord" required/>
                 <div>
                     <input type = "submit" class = "submitButton" id = "loginButton" value = "로그인"/>
-                    <input type = "button" class = "submitButton" id = "skipButton" value = "건너뛰기"/>
                 </div>
                 </form>
-                <div style = "margin-top: 20px">
-                        <a href="/findUser">아이디 비밀번호 찾기</a> / 
-                        <a href= "/signUp">회원가입</a>
+                <div class = "nav_login" style = "margin-top: 20px">
+                    <div>
+                        아이디가 기억나지 않으세요?<a href="/findUser">회원정보찾기</a>
+                    </div>
+                    <div>
+                        아직 회원이 아니신가요?<a href="/signUp">회원가입</a>
+                    </div>
                 </div>
-            </div>
-            <div class = "footer">
-
             </div>
         </div>
         <script>
@@ -39,21 +37,13 @@
                 location.href = '/main';
                 });
                 /* Login Error */
-                var err_level = `<%= err_level %>`,
-                    append_level = function (level) {
-                    if(level === '1') {
-                        return `<div style = "text-align:center; color:red; font-weight:bold;">
-                        입력한 아이디가 존재하지 않습니다. <br>다시 입력해주시길 바랍니다. </div>`;
-                    } else {
-                        return `<div style = "text-align:center; color:red; font-weight:bold;">
-                        입력한 비밀번호가 옳지 않습니다.<br> 다시 입력해주시길 바랍니다.</div>`;
-                }},prepend_element = function(string,jquery) {
-                        return jquery.prepend(string);
-                }
+                let err_level = `<%= err_level %>`;
                 if(err_level) {
-                    var append = append_level(err_level);
-                    console.log(append);
-                    prepend_element(append,$('.content'));
+                    let context = null;
+                    err_level === '1' ?
+                    context = "입력한 아이디가 존재하지 않습니다." :
+                    context = "입력한 비밀번호가 옳지 않습니다.";
+                    prependElement($('.content'),setDiv(context))
                 }
                 /* Form */
                 $('form').submit((e) => {
@@ -75,7 +65,17 @@
                         }
                     })
                 })
-                
+                /* Func */
+                function prependElement(jquery,string) {
+                    return jquery.prepend(string);
+                }
+                function setDiv(context) {
+                    return ` 
+                    <div style = "text-align: center; color: red; font-weight:bold">
+                        <p>${context}</p>
+                        <p>다시 입력해주시길 바랍니다.</p>
+                    </div>`;
+                }
             })
            
         </script>

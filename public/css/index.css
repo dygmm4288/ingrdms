@@ -119,6 +119,7 @@ input[type=text], input[type=password],input[type=email]{
 }
 input[type=text]:focus,input[type=password]:focus{
     background-color: lightblue;
+    
 }
 .submitButton {
     block-size: 5%;
@@ -129,6 +130,9 @@ input[type=text]:focus,input[type=password]:focus{
     background-color: gray;
     color: white;
 }
+.submitButton:hover {
+    background-color: orange;
+}
 .stateButton{
     background-color: #f8b600;
     border-radius: 8px;
@@ -137,7 +141,7 @@ input[type=text]:focus,input[type=password]:focus{
 }
 /* a */
 a:link ,a:visited ,a:active{
-    color: black;
+    color: orange;
 }
 /* column */
 .column{
@@ -170,7 +174,15 @@ a:link ,a:visited ,a:active{
     background-color: rgba(13,178,201,0.58);
     opacity: 0.6;
  }
-
+/* nav */
+.nav_login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.nav_login > div {
+    flex: 0 0 45%;
+}
     /* 팝업창 */
  #popup {
     position:fixed;
