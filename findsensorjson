@@ -1,6 +1,6 @@
 /* Data */
 let user_id = 'dygmm4288',
-    sensor_id = "2_1",
+    sensor_id = "1_2",
     value = "200";
 let _ = {};
 _.update = function(list,data,predi) {
@@ -13,7 +13,11 @@ _.update = function(list,data,predi) {
   return new_list;
 };
 _.push = function(list,data) {
-    let new_list = list;
+    let new_list=[];
+    for(var i = 0,len=list.length;i<len;i++)
+    {
+        new_list.push(list[i]);
+    }
     new_list.push(data);
     return new_list;
 };
