@@ -1,0 +1,97 @@
+/* Data */
+let user_id = 'dygmm4288',
+    sensor_id = "2_1",
+    value = "200";
+let _ = {};
+_.update = function(list,data,predi) {
+  let new_list = [];
+  for(var i = 0,len=list.length;i<len;i++)
+  {
+      if(predi(list[i],i)) new_list.push(data);
+      else new_list.push(list[i]);
+  }  
+  return new_list;
+};
+_.push = function(list,data) {
+    let new_list = list;
+    new_list.push(data);
+    return new_list;
+};
+_.indexOf = function(list,predi) {
+    for(var i =0,len=list.length;i<len;i++)
+    {
+        if(predi(list[i])) return i;
+    }
+    return -1;
+};
+/* index.js */
+let sensor_json = readFile('/sensor.json',parse);
+let user_data = {
+    user_id: user_id,
+    sensor_id: sensor_id,
+    value: value
+};
+/* sensor_json의 내용이 없다면 */
+if(sensor_json.length === 0) {
+    let update_data = _.push(sensor_json,user_data);
+    writeFile('/sensor.json',update_data,stringify);
+}
+/* sensor_json의 내용이 있다면 */
+else {
+    let index = _.indexOf(sensor_json, sensor => { return sensor.sensor_id === user_data.sensor_id && sensor.user_id === user_data.user_id;});
+    /* 현재 유저의 데이터가 있을 경우 */
+    if(log(index) !== -1) {
+        /* 저장된 데이터와 현재 들어온 데이터가 같지 않을 때 */
+        if(sensor_json[index].value !== user_data.value) {
+            let update_data = log(_.update(sensor_json,user_data, (sensor,i) => i === index));
+            writeFile('/sensor.json',update_data,stringify);
+        }
+    }
+    /* 현재 유저의 데이터가 없을 경우 */
+    else {
+        /* 현재 저장된 데이터에 유저 정보를 넣어서 다시 저장. */
+        let update_data = log(_.push(sensor_json,user_data));
+        writeFile('/sensor.json',update_data,stringify);
+    }
+}
+
+
+
+/* Function */
+function readFile(path,json) {
+    const fs = require('fs');
+    let result = fs.readFileSync(__dirname+path,'utf-8',err => {
+        if(err) {
+            
+        }
+        
+        log('read success');
+    });
+    if(json) {
+        result = json(result);
+    }
+    return result;
+}
+function parse(data) {
+    return JSON.parse(data);
+}
+function stringify(data) {
+    return JSON.stringify(data);
+}
+function writeFile(path,data,json) {
+    const fs = require('fs');
+    let write_data = json ? json(data) : data;
+    fs.writeFileSync(__dirname+path,write_data,'utf-8',(err) => {
+        if(err) {
+            throw err;
+        }
+        log('write success');
+    });
+
+}
+function log(data) {
+    let val = data;
+    console.log(val);
+    return val;
+}
+
